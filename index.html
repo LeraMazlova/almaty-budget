@@ -315,6 +315,31 @@
 
     .rate-field input[type="number"]:focus { border: none; outline: none; }
 
+    .refresh-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .refresh-btn:disabled { opacity: 0.4; cursor: default; }
+
+    .rate-status {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+      min-height: 16px;
+    }
+
+    .rate-status.error { color: var(--red); }
+
     /* Convert grid */
     .convert-grid {
       display: grid;
@@ -615,7 +640,9 @@
         <input type="number" id="rate-eur" value="0.0019" step="0.0001" min="0" oninput="calc()" />
         <span class="rate-cur">€</span>
       </div>
+      <button class="refresh-btn" onclick="fetchRates()" id="refresh-btn" title="Обновить курс">↻ Обновить</button>
     </div>
+    <div id="rate-status" class="rate-status"></div>
 
     <!-- Конвертация -->
     <div class="convert-grid">
@@ -767,8 +794,35 @@
     calc();
   }
 
+  async function fetchRates() {
+    const btn = document.getElementById('refresh-btn');
+    const status = document.getElementById('rate-status');
+    btn.disabled = true;
+    btn.textContent = '↻ Загрузка…';
+    status.className = 'rate-status';
+    status.textContent = '';
+    try {
+      const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/kzt.json');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const rates = data.kzt;
+      document.getElementById('rate-rub').value = rates.rub.toFixed(4);
+      document.getElementById('rate-eur').value = rates.eur.toFixed(6);
+      const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      status.textContent = `Курс обновлён в ${now}`;
+      calc();
+    } catch {
+      status.className = 'rate-status error';
+      status.textContent = 'Не удалось загрузить курс — проверьте интернет';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '↻ Обновить';
+    }
+  }
+
   // Init
   calc();
+  fetchRates();
 </script>
 </body>
 </html>
