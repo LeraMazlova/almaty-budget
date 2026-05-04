@@ -30,222 +30,101 @@
       padding: 24px 16px 48px;
     }
 
-    /* ── Views ── */
     .view { display: none; max-width: 900px; margin: 0 auto; }
     .view.active { display: block; }
 
     /* ── Home ── */
-    .home-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-    }
-
+    .home-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
     .home-header h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
+      font-size: 1.6rem; font-weight: 700;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
     .btn-primary {
-      background: var(--accent);
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 10px 18px;
-      transition: opacity 0.2s;
+      background: var(--accent); border: none; border-radius: 10px;
+      color: #fff; cursor: pointer; font-size: 0.875rem; font-weight: 600;
+      padding: 10px 18px; transition: opacity 0.2s;
     }
     .btn-primary:hover { opacity: 0.85; }
 
-    .trips-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 14px;
-    }
+    .trips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 
     .trip-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      cursor: pointer;
-      transition: border-color 0.2s, transform 0.15s;
-      position: relative;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s; position: relative;
     }
     .trip-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-
-    .trip-card-name {
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .trip-card-meta {
-      font-size: 0.8rem;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
+    .trip-card-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+    .trip-card-meta { font-size: 0.8rem; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
     .trip-card-delete {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1rem;
-      opacity: 0;
-      transition: opacity 0.15s, color 0.15s;
-      line-height: 1;
-      padding: 4px;
+      position: absolute; top: 12px; right: 12px; background: transparent; border: none;
+      color: var(--muted); cursor: pointer; font-size: 1rem; opacity: 0;
+      transition: opacity 0.15s, color 0.15s; padding: 4px;
     }
     .trip-card:hover .trip-card-delete { opacity: 1; }
     .trip-card-delete:hover { color: var(--red); }
+    .no-trips { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 0.95rem; }
 
-    .no-trips {
-      text-align: center;
-      color: var(--muted);
-      padding: 60px 20px;
-      font-size: 0.95rem;
-    }
-
-    /* ── Create modal ── */
+    /* ── Modal ── */
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 16px;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px;
     }
     .modal-backdrop.hidden { display: none; }
-
     .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      width: 100%;
-      max-width: 460px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px; width: 100%; max-width: 480px;
+      max-height: 90vh; overflow-y: auto;
     }
-
-    .modal h2 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-
-    .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .modal h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+    .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
     .modal-label { font-size: 0.8rem; color: var(--muted); }
-
     .modal-input {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.95rem;
-      padding: 10px 14px;
-      outline: none;
-      width: 100%;
-      transition: border-color 0.2s;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.95rem; padding: 10px 14px;
+      outline: none; width: 100%; transition: border-color 0.2s;
     }
     .modal-input:focus { border-color: var(--accent); }
-
-    .modal-participants { margin-bottom: 16px; }
-    .modal-participant-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
+    .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .modal-participant-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .modal-section-label {
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--muted); margin: 16px 0 10px;
     }
 
     .btn-ghost {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.875rem;
-      padding: 9px 16px;
+      background: transparent; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); cursor: pointer; font-size: 0.875rem; padding: 9px 16px;
       transition: border-color 0.2s, color 0.2s;
     }
     .btn-ghost:hover { border-color: var(--text); color: var(--text); }
 
     /* ── Trip view ── */
-    .trip-topbar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
+    .trip-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
     .back-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 8px 14px;
-      transition: border-color 0.2s, color 0.2s;
-      white-space: nowrap;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); cursor: pointer; font-size: 0.85rem; padding: 8px 14px;
+      transition: border-color 0.2s, color 0.2s; white-space: nowrap;
     }
     .back-btn:hover { border-color: var(--accent); color: var(--accent); }
-
     .trip-title {
-      font-size: 1.4rem;
-      font-weight: 700;
+      font-size: 1.4rem; font-weight: 700;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
-    /* ── Grid & cards ── */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
+    /* ── Grid & Cards ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-    }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
     .card.full { grid-column: 1 / -1; }
-
     .card-title {
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
     }
 
     .input-row { display: flex; flex-direction: column; gap: 10px; }
@@ -253,33 +132,32 @@
     label { font-size: 0.8rem; color: var(--muted); }
 
     input[type="number"] {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 1rem;
-      padding: 10px 14px;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s;
-      -moz-appearance: textfield;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 1rem; padding: 10px 14px; width: 100%;
+      outline: none; transition: border-color 0.2s; -moz-appearance: textfield;
     }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
     input[type="number"]:focus { border-color: var(--accent); }
 
+    input[type="date"] {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.875rem; padding: 9px 12px; width: 100%;
+      outline: none; transition: border-color 0.2s; cursor: pointer;
+    }
+    input[type="date"]:focus { border-color: var(--accent); }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
     .suffix { position: relative; }
     .suffix input { padding-right: 46px; }
     .suffix span {
-      position: absolute; right: 14px; top: 50%;
-      transform: translateY(-50%);
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
       color: var(--muted); font-size: 0.85rem; pointer-events: none;
     }
 
     /* Totals */
     .totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     @media (max-width: 500px) { .totals { grid-template-columns: 1fr; } }
-
     .total-box { background: var(--surface2); border-radius: 10px; padding: 16px; text-align: center; }
     .total-box .label { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
     .total-box .amount { font-size: 1.55rem; font-weight: 700; }
@@ -333,7 +211,7 @@
     .convert-row span:last-child { font-weight: 600; color: var(--text); }
 
     /* Links */
-    .link-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+    .link-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
     input[type="url"] {
       background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
       color: var(--muted); font-size: 0.8rem; padding: 7px 12px; width: 100%;
@@ -350,7 +228,40 @@
     .open-link:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
     .open-link.disabled { pointer-events: none; opacity: 0.3; }
 
-    /* Participants in trip */
+    /* Accommodation blocks */
+    .acc-block {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; margin-bottom: 10px;
+    }
+    .acc-block-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .acc-block-header input[type="text"] {
+      background: transparent; border: none; color: var(--text);
+      font-size: 0.95rem; font-weight: 600; outline: none; flex: 1; min-width: 0;
+      border-bottom: 1px solid var(--border); padding-bottom: 4px;
+      transition: border-color 0.2s;
+    }
+    .acc-block-header input[type="text"]:focus { border-color: var(--accent); }
+    .acc-block-header input[type="text"]::placeholder { color: #3d4460; font-weight: 400; }
+
+    .acc-period-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+    }
+    .acc-period-field { display: flex; flex-direction: column; gap: 4px; }
+    .acc-period-field label { font-size: 0.75rem; color: var(--muted); }
+
+    .night-select {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.875rem; padding: 9px 10px;
+      outline: none; cursor: pointer; transition: border-color 0.2s; width: 100%;
+    }
+    .night-select:focus { border-color: var(--accent); }
+
+    .acc-amount-row { display: flex; align-items: center; gap: 8px; }
+    .acc-amount-row .suffix { flex: 1; }
+
+    .acc-empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0; }
+
+    /* Participants */
     .participant-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .participant-name {
       background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
@@ -370,14 +281,13 @@
     .add-btn {
       background: transparent; border: 1px dashed var(--border); border-radius: 8px;
       color: var(--muted); cursor: pointer; font-size: 0.82rem; padding: 8px 14px;
-      transition: border-color 0.2s, color 0.2s; margin-top: 4px;
+      transition: border-color 0.2s, color 0.2s;
     }
     .add-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     /* Payments */
     .payment-row {
-      display: grid;
-      grid-template-columns: 1fr 120px 1fr auto;
+      display: grid; grid-template-columns: 1fr 120px 1fr auto;
       gap: 8px; align-items: center; margin-bottom: 8px;
     }
     @media (max-width: 600px) {
@@ -407,11 +317,8 @@
 
     /* Extra expenses */
     .extra-row {
-      display: grid;
-      grid-template-columns: 1fr 140px auto;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
+      display: grid; grid-template-columns: 1fr 140px auto;
+      gap: 8px; align-items: center; margin-bottom: 8px;
     }
     @media (max-width: 500px) {
       .extra-row { grid-template-columns: 1fr auto; grid-template-rows: auto auto; }
@@ -443,7 +350,6 @@
     .bal-pos { color: var(--green); font-weight: 600; }
     .bal-neg { color: var(--red); font-weight: 600; }
     .bal-zero { color: var(--muted); font-weight: 600; }
-
     .transfers { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
     .transfer-item {
       display: flex; align-items: center; gap: 8px;
@@ -497,27 +403,8 @@
     <!-- Проживание -->
     <div class="card">
       <div class="card-title"><span>🏨</span> Проживание</div>
-      <div class="input-row">
-        <div class="field"><label>Ночь 1 — отель / хостел</label>
-          <div class="suffix"><input type="number" id="hotel1" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div>
-          <div class="link-row"><input type="url" id="link1" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(1)" />
-            <a id="open1" class="open-link disabled" target="_blank" rel="noopener">↗</a></div></div>
-        <div class="field"><label>Ночь 2 — отель / хостел</label>
-          <div class="suffix"><input type="number" id="hotel2" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div>
-          <div class="link-row"><input type="url" id="link2" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(2)" />
-            <a id="open2" class="open-link disabled" target="_blank" rel="noopener">↗</a></div></div>
-        <div class="field"><label>Ночь 3 — отель / хостел</label>
-          <div class="suffix"><input type="number" id="hotel3" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div>
-          <div class="link-row"><input type="url" id="link3" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(3)" />
-            <a id="open3" class="open-link disabled" target="_blank" rel="noopener">↗</a></div></div>
-      </div>
-    </div>
-
-    <!-- Доп. расходы -->
-    <div class="card full">
-      <div class="card-title"><span>🧾</span> Дополнительные расходы</div>
-      <div id="extra-list"></div>
-      <button class="add-btn" onclick="addExtra()" style="margin-top:8px;">+ Добавить расход</button>
+      <div id="accommodations-list"></div>
+      <button class="add-btn" onclick="addAccommodation()" style="margin-top:8px;">+ Добавить жильё</button>
     </div>
 
     <!-- Питание -->
@@ -546,13 +433,20 @@
       </div>
     </div>
 
+    <!-- Доп. расходы -->
+    <div class="card full">
+      <div class="card-title"><span>🧾</span> Дополнительные расходы</div>
+      <div id="extra-list"></div>
+      <button class="add-btn" onclick="addExtra()" style="margin-top:8px;">+ Добавить расход</button>
+    </div>
+
     <!-- Итоги -->
     <div class="card full">
       <div class="card-title"><span>📊</span> Итого</div>
       <div class="totals">
         <div class="total-box"><div class="label">Общий бюджет</div><div class="amount main" id="total">0 ₸</div></div>
         <div class="total-box"><div class="label" id="per-person-label">На человека</div><div class="amount per-person" id="per-person">0 ₸</div></div>
-        <div class="total-box"><div class="label">В день на человека</div><div class="amount days" id="per-day">0 ₸</div></div>
+        <div class="total-box"><div class="label" id="per-day-label">В день на человека</div><div class="amount days" id="per-day">0 ₸</div></div>
       </div>
 
       <div class="rates-row">
@@ -590,8 +484,8 @@
       <div class="breakdown-list">
         <div class="bline"><span class="bline-name">🚗 Транспорт</span><span class="bline-val" id="b-transport">0 ₸</span></div>
         <div class="bline"><span class="bline-name">🏨 Проживание</span><span class="bline-val" id="b-hotel">0 ₸</span></div>
-        <div class="bline"><span class="bline-name">🧾 Доп. расходы</span><span class="bline-val" id="b-parks">0 ₸</span></div>
         <div class="bline"><span class="bline-name">🍽 Питание</span><span class="bline-val" id="b-food">0 ₸</span></div>
+        <div class="bline"><span class="bline-name">🧾 Доп. расходы</span><span class="bline-val" id="b-extras">0 ₸</span></div>
         <div class="bline"><span class="bline-name">💼 Прочее</span><span class="bline-val" id="b-misc">0 ₸</span></div>
       </div>
 
@@ -599,15 +493,15 @@
         <div class="bar-track">
           <div class="bar-seg" id="seg-transport" style="background:#6c8ef5;width:0%"></div>
           <div class="bar-seg" id="seg-hotel"     style="background:#a78bfa;width:0%"></div>
-          <div class="bar-seg" id="seg-parks"     style="background:#34d399;width:0%"></div>
           <div class="bar-seg" id="seg-food"      style="background:#fbbf24;width:0%"></div>
+          <div class="bar-seg" id="seg-extras"    style="background:#34d399;width:0%"></div>
           <div class="bar-seg" id="seg-misc"      style="background:#f87171;width:0%"></div>
         </div>
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:#6c8ef5"></div>Транспорт</div>
           <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Проживание</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Доп. расходы</div>
           <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Питание</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Доп. расходы</div>
           <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Прочее</div>
         </div>
       </div>
@@ -638,7 +532,7 @@
   </div>
 </div>
 
-<!-- ── MODAL: create trip ── -->
+<!-- ── MODAL ── -->
 <div id="modal-create" class="modal-backdrop hidden">
   <div class="modal">
     <h2>Новая поездка</h2>
@@ -648,7 +542,18 @@
       <input type="text" class="modal-input" id="new-trip-name" placeholder="Алматы · Май 2026" />
     </div>
 
-    <div class="modal-label" style="margin-bottom:10px;">Участники</div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <div class="modal-label">Дата начала (необязательно)</div>
+        <input type="date" class="modal-input" id="new-trip-start" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Количество ночей</div>
+        <input type="number" class="modal-input" id="new-trip-nights" value="3" min="1" max="60" />
+      </div>
+    </div>
+
+    <div class="modal-section-label">Участники</div>
     <div id="modal-participants"></div>
     <button class="add-btn" onclick="modalAddParticipant()">+ Добавить участника</button>
 
@@ -660,40 +565,27 @@
 </div>
 
 <script>
-  // ── App state ──────────────────────────────────────────
   const STORE_KEY = 'travel-budget-app';
-
   let appData = { trips: [], nextTripId: 1 };
   let currentTripId = null;
   let lastTotal = 0;
 
-  const EXPENSE_KEYS = ['car','fuel','parking','hotel1','hotel2','hotel3',
-                        'food1','food2','food3','souvenirs','misc','insurance',
-                        'link1','link2','link3'];
+  const EXPENSE_KEYS = ['car','fuel','parking','food1','food2','food3',
+                        'souvenirs','misc','insurance'];
 
   // ── Persistence ────────────────────────────────────────
-  function save() {
-    localStorage.setItem(STORE_KEY, JSON.stringify(appData));
-  }
+  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(appData)); }
 
   function load() {
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (raw) appData = JSON.parse(raw);
-    } catch {}
+    try { const r = localStorage.getItem(STORE_KEY); if (r) appData = JSON.parse(r); } catch {}
   }
 
-  function currentTrip() {
-    return appData.trips.find(t => t.id === currentTripId);
-  }
+  function currentTrip() { return appData.trips.find(t => t.id === currentTripId); }
 
   // ── Helpers ────────────────────────────────────────────
   function escHtml(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
-
   function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
   function fmt(n) { return new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₸'; }
   function fmtRub(n) { return new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽'; }
@@ -705,43 +597,66 @@
     window.scrollTo(0, 0);
   }
 
+  // Получить дату ночи по её номеру (1-based)
+  function nightDate(trip, nightNum) {
+    if (!trip.startDate) return null;
+    const d = new Date(trip.startDate);
+    d.setDate(d.getDate() + nightNum - 1);
+    return d;
+  }
+
+  function formatNight(trip, nightNum) {
+    const d = nightDate(trip, nightNum);
+    if (!d) return `Ночь ${nightNum}`;
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  }
+
+  function nightOptions(trip, selectedNight) {
+    const nights = trip.nights || 3;
+    let html = '';
+    for (let i = 1; i <= nights; i++) {
+      html += `<option value="${i}" ${selectedNight === i ? 'selected' : ''}>${formatNight(trip, i)}</option>`;
+    }
+    // Extra option: after last night (checkout)
+    const checkout = nights + 1;
+    html += `<option value="${checkout}" ${selectedNight === checkout ? 'selected' : ''}>${formatNight(trip, checkout)} (выезд)</option>`;
+    return html;
+  }
+
   // ── Home ───────────────────────────────────────────────
   function renderHome() {
     const el = document.getElementById('trips-grid');
-    if (appData.trips.length === 0) {
+    if (!appData.trips.length) {
       el.innerHTML = '<div class="no-trips">Нет поездок. Создай первую!</div>';
       return;
     }
     el.innerHTML = appData.trips.map(trip => {
-      const pCount = trip.participants.length;
-      const date   = new Date(trip.createdAt).toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
-      const total  = Object.values(trip.expenses || {})
-        .filter(k => !['link1','link2','link3'].includes(k))
-        .reduce((s, val) => s + (parseFloat(val) || 0), 0);
-      return `
-        <div class="trip-card" onclick="openTrip(${trip.id})">
-          <button class="trip-card-delete" onclick="event.stopPropagation(); deleteTrip(${trip.id})">×</button>
-          <div class="trip-card-name">${escHtml(trip.name)}</div>
-          <div class="trip-card-meta">
-            <span>👥 ${pCount} ${pCount === 1 ? 'участник' : pCount < 5 ? 'участника' : 'участников'}</span>
-            <span>📅 ${date}</span>
-            ${total > 0 ? `<span style="color:var(--accent);margin-top:4px;font-weight:600;">${fmt(total)}</span>` : ''}
-          </div>
-        </div>`;
+      const n    = trip.participants.length;
+      const date = new Date(trip.createdAt).toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'});
+      const nights = trip.nights || 3;
+      const total = [...EXPENSE_KEYS.map(k => parseFloat(trip.expenses?.[k] || 0)),
+                     ...(trip.accommodations||[]).map(a => a.amount||0),
+                     ...(trip.extras||[]).map(e => e.amount||0)].reduce((s,x)=>s+x,0);
+      const pLabel = n === 1 ? '1 участник' : n < 5 ? `${n} участника` : `${n} участников`;
+      return `<div class="trip-card" onclick="openTrip(${trip.id})">
+        <button class="trip-card-delete" onclick="event.stopPropagation();deleteTrip(${trip.id})">×</button>
+        <div class="trip-card-name">${escHtml(trip.name)}</div>
+        <div class="trip-card-meta">
+          <span>👥 ${pLabel}</span>
+          <span>🌙 ${nights} ${nights===1?'ночь':nights<5?'ночи':'ночей'}</span>
+          ${trip.startDate ? `<span>📅 ${new Date(trip.startDate).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</span>` : `<span>📅 ${date}</span>`}
+          ${total > 0 ? `<span style="color:var(--accent);margin-top:4px;font-weight:600;">${fmt(total)}</span>` : ''}
+        </div>
+      </div>`;
     }).join('');
   }
 
-  function goHome() {
-    currentTripId = null;
-    renderHome();
-    showView('view-home');
-  }
+  function goHome() { currentTripId = null; renderHome(); showView('view-home'); }
 
   function deleteTrip(id) {
     if (!confirm('Удалить поездку?')) return;
     appData.trips = appData.trips.filter(t => t.id !== id);
-    save();
-    renderHome();
+    save(); renderHome();
   }
 
   // ── Create modal ───────────────────────────────────────
@@ -749,33 +664,32 @@
   let modalNextId = 1;
 
   function openCreateModal() {
-    modalParticipants = [{ id: 1, name: '' }, { id: 2, name: '' }];
+    modalParticipants = [{id:1,name:''},{id:2,name:''}];
     modalNextId = 3;
     document.getElementById('new-trip-name').value = '';
+    document.getElementById('new-trip-start').value = '';
+    document.getElementById('new-trip-nights').value = '3';
     renderModalParticipants();
     document.getElementById('modal-create').classList.remove('hidden');
     document.getElementById('new-trip-name').focus();
   }
 
-  function closeCreateModal() {
-    document.getElementById('modal-create').classList.add('hidden');
-  }
+  function closeCreateModal() { document.getElementById('modal-create').classList.add('hidden'); }
 
   function renderModalParticipants() {
     const el = document.getElementById('modal-participants');
     el.innerHTML = modalParticipants.map((p, i) => `
       <div class="modal-participant-row">
         <input type="text" class="modal-input" value="${escHtml(p.name)}"
-               placeholder="Имя участника ${i + 1}"
+               placeholder="Имя участника ${i+1}"
                oninput="modalParticipants[${i}].name = this.value" />
         ${modalParticipants.length > 1
-          ? `<button class="remove-btn" onclick="modalRemoveParticipant(${p.id})">×</button>`
-          : ''}
+          ? `<button class="remove-btn" onclick="modalRemoveParticipant(${p.id})">×</button>` : ''}
       </div>`).join('');
   }
 
   function modalAddParticipant() {
-    modalParticipants.push({ id: modalNextId++, name: '' });
+    modalParticipants.push({id: modalNextId++, name: ''});
     renderModalParticipants();
   }
 
@@ -786,25 +700,20 @@
   }
 
   function createTrip() {
-    const name = document.getElementById('new-trip-name').value.trim() || 'Поездка';
+    const name       = document.getElementById('new-trip-name').value.trim() || 'Поездка';
+    const startDate  = document.getElementById('new-trip-start').value || null;
+    const nights     = parseInt(document.getElementById('new-trip-nights').value) || 3;
     const participants = modalParticipants.map((p, i) => ({
-      id: p.id,
-      name: p.name.trim() || `Участник ${i + 1}`
+      id: p.id, name: p.name.trim() || `Участник ${i+1}`
     }));
     const trip = {
-      id: appData.nextTripId++,
-      name,
+      id: appData.nextTripId++, name, startDate, nights,
       createdAt: new Date().toISOString(),
-      participants,
-      nextPId:   modalNextId,
-      nextPayId: 1,
-      payments:  [],
-      expenses:  {}
+      participants, nextPId: modalNextId, nextPayId: 1, nextExtraId: 1, nextAccId: 1,
+      payments: [], extras: [], accommodations: [], expenses: {}
     };
     appData.trips.unshift(trip);
-    save();
-    closeCreateModal();
-    openTrip(trip.id);
+    save(); closeCreateModal(); openTrip(trip.id);
   }
 
   // ── Open trip ──────────────────────────────────────────
@@ -812,32 +721,143 @@
     currentTripId = id;
     const trip = currentTrip();
     if (!trip) return;
+    if (!trip.accommodations) trip.accommodations = [];
+    if (!trip.extras)         trip.extras = [];
+    if (!trip.nextAccId)      trip.nextAccId = 1;
+    if (!trip.nextExtraId)    trip.nextExtraId = 1;
 
     document.getElementById('trip-title').textContent = trip.name;
+    const nights = trip.nights || 3;
+    document.getElementById('per-day-label').textContent = `В день на человека (${nights} дн.)`;
 
-    // Fill expense inputs
     EXPENSE_KEYS.forEach(key => {
       const el = document.getElementById(key);
       if (el) el.value = trip.expenses[key] || '';
     });
-    [1,2,3].forEach(n => updateLink(n));
 
+    renderAccommodations();
+    renderExtras();
     renderParticipants();
     renderPayments();
-    renderExtras();
     calc();
     showView('view-trip');
     fetchRates();
+  }
+
+  // ── Accommodations ─────────────────────────────────────
+  function renderAccommodations() {
+    const trip = currentTrip();
+    if (!trip) return;
+    const el = document.getElementById('accommodations-list');
+    el.innerHTML = '';
+
+    if (!trip.accommodations.length) {
+      el.innerHTML = '<div class="acc-empty">Добавьте жильё — отель, квартира, хостел</div>';
+      return;
+    }
+
+    trip.accommodations.forEach(acc => {
+      const block = document.createElement('div');
+      block.className = 'acc-block';
+
+      const hasDate = !!trip.startDate;
+      const periodFrom = hasDate
+        ? `<input type="date" value="${acc.checkIn || ''}"
+                  oninput="updateAcc(${acc.id},'checkIn',this.value)" />`
+        : `<select class="night-select" onchange="updateAcc(${acc.id},'nightFrom',this.value)">
+             ${nightOptions(trip, acc.nightFrom || 1)}
+           </select>`;
+      const periodTo = hasDate
+        ? `<input type="date" value="${acc.checkOut || ''}"
+                  oninput="updateAcc(${acc.id},'checkOut',this.value)" />`
+        : `<select class="night-select" onchange="updateAcc(${acc.id},'nightTo',this.value)">
+             ${nightOptions(trip, acc.nightTo || (trip.nights || 3))}
+           </select>`;
+
+      const linkUrl = acc.link || '';
+      const linkDisabled = linkUrl ? '' : 'disabled';
+
+      block.innerHTML = `
+        <div class="acc-block-header">
+          <input type="text" value="${escHtml(acc.name)}"
+                 placeholder="Название (Hilton, Airbnb на Абая…)"
+                 oninput="updateAcc(${acc.id},'name',this.value)" />
+          <button class="remove-btn" onclick="removeAcc(${acc.id})">×</button>
+        </div>
+        <div class="acc-period-row">
+          <div class="acc-period-field">
+            <label>${hasDate ? 'Дата заезда' : 'Заезд'}</label>
+            ${periodFrom}
+          </div>
+          <div class="acc-period-field">
+            <label>${hasDate ? 'Дата выезда' : 'Выезд'}</label>
+            ${periodTo}
+          </div>
+        </div>
+        <div class="acc-amount-row">
+          <div class="suffix" style="flex:1">
+            <input type="number" value="${acc.amount || ''}" placeholder="0" min="0"
+                   oninput="updateAcc(${acc.id},'amount',this.value)" />
+            <span>₸</span>
+          </div>
+        </div>
+        <div class="link-row" style="margin-top:8px;">
+          <input type="url" value="${escHtml(linkUrl)}" placeholder="Ссылка Booking / Airbnb…"
+                 oninput="updateAcc(${acc.id},'link',this.value);updateAccLink(${acc.id},this)" />
+          <a id="acc-link-${acc.id}" class="open-link ${linkDisabled}"
+             href="${escHtml(linkUrl) || '#'}" target="_blank" rel="noopener">↗</a>
+        </div>`;
+      el.appendChild(block);
+    });
+  }
+
+  function addAccommodation() {
+    const trip = currentTrip();
+    if (!trip) return;
+    const nights = trip.nights || 3;
+    trip.accommodations.push({
+      id: trip.nextAccId++, name: '',
+      nightFrom: 1, nightTo: nights,
+      checkIn: '', checkOut: '',
+      amount: 0, link: ''
+    });
+    save(); renderAccommodations();
+  }
+
+  function removeAcc(id) {
+    const trip = currentTrip();
+    if (!trip) return;
+    trip.accommodations = trip.accommodations.filter(a => a.id !== id);
+    save(); renderAccommodations(); calc();
+  }
+
+  function updateAcc(id, field, value) {
+    const trip = currentTrip();
+    if (!trip) return;
+    const acc = trip.accommodations.find(a => a.id === id);
+    if (!acc) return;
+    if (field === 'amount') acc.amount = parseFloat(value) || 0;
+    else if (field === 'nightFrom') acc.nightFrom = parseInt(value);
+    else if (field === 'nightTo')   acc.nightTo   = parseInt(value);
+    else acc[field] = value;
+    save(); calc();
+  }
+
+  function updateAccLink(id, input) {
+    const btn = document.getElementById('acc-link-' + id);
+    if (!btn) return;
+    const url = input.value.trim();
+    if (url) { btn.href = url; btn.classList.remove('disabled'); }
+    else     { btn.href = '#'; btn.classList.add('disabled'); }
   }
 
   // ── Extra expenses ─────────────────────────────────────
   function renderExtras() {
     const trip = currentTrip();
     if (!trip) return;
-    if (!trip.extras) trip.extras = [];
     const el = document.getElementById('extra-list');
     el.innerHTML = '';
-    if (trip.extras.length === 0) {
+    if (!trip.extras.length) {
       el.innerHTML = '<div class="payments-empty">Добавьте расход — билеты, экскурсии, любые траты</div>';
       return;
     }
@@ -847,10 +867,10 @@
       row.innerHTML = `
         <input type="text" class="extra-name" value="${escHtml(ex.name)}"
                placeholder="Название (Чарынский каньон…)"
-               oninput="updateExtra(${ex.id}, 'name', this.value)" />
+               oninput="updateExtra(${ex.id},'name',this.value)" />
         <div class="extra-amount">
-          <input type="number" value="${ex.amount || ''}" placeholder="0" min="0"
-                 oninput="updateExtra(${ex.id}, 'amount', this.value)" />
+          <input type="number" value="${ex.amount||''}" placeholder="0" min="0"
+                 oninput="updateExtra(${ex.id},'amount',this.value)" />
           <span>₸</span>
         </div>
         <button class="remove-btn" onclick="removeExtra(${ex.id})">×</button>`;
@@ -861,8 +881,6 @@
   function addExtra() {
     const trip = currentTrip();
     if (!trip) return;
-    if (!trip.extras) trip.extras = [];
-    if (!trip.nextExtraId) trip.nextExtraId = 1;
     trip.extras.push({ id: trip.nextExtraId++, name: '', amount: 0 });
     save(); renderExtras();
   }
@@ -879,12 +897,11 @@
     if (!trip) return;
     const ex = trip.extras.find(e => e.id === id);
     if (!ex) return;
-    if (field === 'amount') ex.amount = parseFloat(value) || 0;
-    else ex.name = value;
+    ex[field] = field === 'amount' ? (parseFloat(value) || 0) : value;
     save(); calc();
   }
 
-  // ── Participants (in trip) ─────────────────────────────
+  // ── Participants ───────────────────────────────────────
   function renderParticipants() {
     const trip = currentTrip();
     if (!trip) return;
@@ -895,10 +912,9 @@
       row.className = 'participant-row';
       row.innerHTML = `
         <input type="text" class="participant-name" value="${escHtml(p.name)}"
-               oninput="updateParticipantName(${p.id}, this.value)" placeholder="Имя" />
+               oninput="updateParticipantName(${p.id},this.value)" placeholder="Имя" />
         ${trip.participants.length > 1
-          ? `<button class="remove-btn" onclick="removeParticipant(${p.id})">×</button>`
-          : ''}`;
+          ? `<button class="remove-btn" onclick="removeParticipant(${p.id})">×</button>` : ''}`;
       el.appendChild(row);
     });
     renderPayments();
@@ -915,7 +931,7 @@
     const trip = currentTrip();
     if (!trip || trip.participants.length <= 1) return;
     trip.participants = trip.participants.filter(p => p.id !== id);
-    trip.payments     = trip.payments.filter(pay => pay.participantId !== id);
+    trip.payments = trip.payments.filter(pay => pay.participantId !== id);
     save(); renderParticipants(); calc();
   }
 
@@ -924,9 +940,7 @@
     if (!trip) return;
     const p = trip.participants.find(p => p.id === id);
     if (p) p.name = name;
-    renderPayments();
-    calcSettlement(lastTotal);
-    save();
+    renderPayments(); calcSettlement(lastTotal); save();
   }
 
   // ── Payments ───────────────────────────────────────────
@@ -935,26 +949,25 @@
     if (!trip) return;
     const el = document.getElementById('payments-list');
     el.innerHTML = '';
-    if (trip.payments.length === 0) {
+    if (!trip.payments.length) {
       el.innerHTML = '<div class="payments-empty">Добавьте платёж — кто и сколько реально заплатил</div>';
-      calcSettlement(lastTotal);
-      return;
+      calcSettlement(lastTotal); return;
     }
     trip.payments.forEach(pay => {
-      const options = trip.participants.map(p =>
-        `<option value="${p.id}" ${pay.participantId === p.id ? 'selected' : ''}>${escHtml(p.name)}</option>`
+      const opts = trip.participants.map(p =>
+        `<option value="${p.id}" ${pay.participantId===p.id?'selected':''}>${escHtml(p.name)}</option>`
       ).join('');
       const row = document.createElement('div');
       row.className = 'payment-row';
       row.innerHTML = `
-        <select onchange="updatePayment(${pay.id}, 'participantId', this.value)">${options}</select>
+        <select onchange="updatePayment(${pay.id},'participantId',this.value)">${opts}</select>
         <div class="pay-amount-wrap">
-          <input type="number" value="${pay.amount || ''}" placeholder="0" min="0"
-                 oninput="updatePayment(${pay.id}, 'amount', this.value)" />
+          <input type="number" value="${pay.amount||''}" placeholder="0" min="0"
+                 oninput="updatePayment(${pay.id},'amount',this.value)" />
           <span>₸</span>
         </div>
         <input type="text" class="pay-note" value="${escHtml(pay.note)}"
-               placeholder="За что…" oninput="updatePayment(${pay.id}, 'note', this.value)" />
+               placeholder="За что…" oninput="updatePayment(${pay.id},'note',this.value)" />
         <button class="remove-btn" onclick="removePayment(${pay.id})">×</button>`;
       el.appendChild(row);
     });
@@ -983,8 +996,7 @@
     if (field === 'amount') pay.amount = parseFloat(value) || 0;
     else if (field === 'participantId') pay.participantId = parseInt(value);
     else pay.note = value;
-    calcSettlement(lastTotal);
-    save();
+    calcSettlement(lastTotal); save();
   }
 
   // ── Settlement ─────────────────────────────────────────
@@ -996,27 +1008,22 @@
 
     const n = trip.participants.length;
     const fairShare = n > 0 ? total / n : 0;
-
     const paid = {};
     trip.participants.forEach(p => { paid[p.id] = 0; });
-    trip.payments.forEach(pay => {
-      if (paid[pay.participantId] !== undefined) paid[pay.participantId] += pay.amount;
-    });
+    trip.payments.forEach(pay => { if (paid[pay.participantId] !== undefined) paid[pay.participantId] += pay.amount; });
 
     const balances = trip.participants.map(p => ({
-      ...p,
-      paid: paid[p.id],
-      owes: fairShare,
-      balance: paid[p.id] - fairShare
+      ...p, paid: paid[p.id], owes: fairShare, balance: paid[p.id] - fairShare
     }));
 
-    if (total === 0 && trip.payments.length === 0) {
+    if (total === 0 && !trip.payments.length) {
       el.innerHTML = '<div class="settlement-empty">Заполни расходы и платежи — здесь появится кто кому должен</div>';
       return;
     }
 
-    let html = `<table class="settlement-table">
-      <thead><tr><th>Участник</th><th>Заплатил</th><th>Доля</th><th>Баланс</th></tr></thead><tbody>`;
+    let html = `<table class="settlement-table"><thead><tr>
+      <th>Участник</th><th>Заплатил</th><th>Доля</th><th>Баланс</th>
+    </tr></thead><tbody>`;
     balances.forEach(b => {
       const cls  = b.balance > 0 ? 'bal-pos' : b.balance < 0 ? 'bal-neg' : 'bal-zero';
       const sign = b.balance > 0 ? '+' : '';
@@ -1026,30 +1033,26 @@
     html += '</tbody></table>';
 
     const transfers = minTransfers(balances);
-    if (transfers.length > 0) {
-      html += '<div class="transfers">';
-      transfers.forEach(t => {
-        html += `<div class="transfer-item">
-          <span>${escHtml(t.from)}</span><span class="transfer-arrow">→</span>
-          <span>${escHtml(t.to)}</span><span class="transfer-amount">${fmt(t.amount)}</span>
-        </div>`;
-      });
-      html += '</div>';
-    } else if (trip.payments.length > 0) {
+    if (transfers.length) {
+      html += '<div class="transfers">' + transfers.map(t =>
+        `<div class="transfer-item"><span>${escHtml(t.from)}</span><span class="transfer-arrow">→</span>
+         <span>${escHtml(t.to)}</span><span class="transfer-amount">${fmt(t.amount)}</span></div>`
+      ).join('') + '</div>';
+    } else if (trip.payments.length) {
       html += '<div class="settlement-empty" style="margin-top:12px;">Все в расчёте ✓</div>';
     }
     el.innerHTML = html;
   }
 
   function minTransfers(balances) {
-    const eps = 1;
-    const cred = balances.filter(b => b.balance >  eps).map(b => ({ name: b.name, amount:  b.balance }));
-    const debt = balances.filter(b => b.balance < -eps).map(b => ({ name: b.name, amount: -b.balance }));
+    const eps  = 1;
+    const cred = balances.filter(b => b.balance >  eps).map(b => ({name:b.name, amount: b.balance}));
+    const debt = balances.filter(b => b.balance < -eps).map(b => ({name:b.name, amount:-b.balance}));
     const res  = [];
     while (cred.length && debt.length) {
-      const c = cred[cred.length - 1], d = debt[debt.length - 1];
+      const c = cred[cred.length-1], d = debt[debt.length-1];
       const t = Math.min(c.amount, d.amount);
-      res.push({ from: d.name, to: c.name, amount: t });
+      res.push({from: d.name, to: c.name, amount: t});
       c.amount -= t; d.amount -= t;
       if (c.amount < eps) cred.pop();
       if (d.amount < eps) debt.pop();
@@ -1063,16 +1066,17 @@
     if (!trip) return;
 
     const transport = v('car') + v('fuel') + v('parking');
-    const hotel     = v('hotel1') + v('hotel2') + v('hotel3');
-    const extras    = (trip.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
+    const hotel     = (trip.accommodations||[]).reduce((s,a) => s + (a.amount||0), 0);
     const food      = v('food1') + v('food2') + v('food3');
+    const extras    = (trip.extras||[]).reduce((s,e) => s + (e.amount||0), 0);
     const misc      = v('souvenirs') + v('misc') + v('insurance');
-    const total     = transport + hotel + extras + food + misc;
+    const total     = transport + hotel + food + extras + misc;
+
+    const nights    = trip.nights || 3;
     const n         = trip.participants.length || 1;
     const perPerson = total / n;
-    const perDay    = perPerson / 3;
+    const perDay    = perPerson / nights;
 
-    // Save expenses to trip
     EXPENSE_KEYS.forEach(key => {
       const el = document.getElementById(key);
       if (el) trip.expenses[key] = el.value;
@@ -1087,67 +1091,48 @@
 
     document.getElementById('b-transport').textContent = fmt(transport);
     document.getElementById('b-hotel').textContent     = fmt(hotel);
-    document.getElementById('b-parks').textContent     = fmt(extras);
     document.getElementById('b-food').textContent      = fmt(food);
+    document.getElementById('b-extras').textContent    = fmt(extras);
     document.getElementById('b-misc').textContent      = fmt(misc);
 
     const rub = v('rate-rub'), eur = v('rate-eur');
     const ppLabel = n === 1 ? 'На человека' : `На чел. (из ${n})`;
-    document.getElementById('c-total-rub').textContent     = fmtRub(total * rub);
-    document.getElementById('c-pp-rub').textContent        = fmtRub(perPerson * rub);
-    document.getElementById('c-pd-rub').textContent        = fmtRub(perDay * rub);
-    document.getElementById('c-total-eur').textContent     = fmtEur(total * eur);
-    document.getElementById('c-pp-eur').textContent        = fmtEur(perPerson * eur);
-    document.getElementById('c-pd-eur').textContent        = fmtEur(perDay * eur);
-    document.getElementById('c-pp-label-rub').textContent  = ppLabel;
-    document.getElementById('c-pp-label-eur').textContent  = ppLabel;
+    document.getElementById('c-total-rub').textContent    = fmtRub(total * rub);
+    document.getElementById('c-pp-rub').textContent       = fmtRub(perPerson * rub);
+    document.getElementById('c-pd-rub').textContent       = fmtRub(perDay * rub);
+    document.getElementById('c-total-eur').textContent    = fmtEur(total * eur);
+    document.getElementById('c-pp-eur').textContent       = fmtEur(perPerson * eur);
+    document.getElementById('c-pd-eur').textContent       = fmtEur(perDay * eur);
+    document.getElementById('c-pp-label-rub').textContent = ppLabel;
+    document.getElementById('c-pp-label-eur').textContent = ppLabel;
 
     if (total > 0) {
-      document.getElementById('seg-transport').style.width = (transport / total * 100) + '%';
-      document.getElementById('seg-hotel').style.width     = (hotel / total * 100) + '%';
-      document.getElementById('seg-parks').style.width     = (extras / total * 100) + '%';
-      document.getElementById('seg-food').style.width      = (food / total * 100) + '%';
-      document.getElementById('seg-misc').style.width      = (misc / total * 100) + '%';
+      document.getElementById('seg-transport').style.width = (transport/total*100)+'%';
+      document.getElementById('seg-hotel').style.width     = (hotel/total*100)+'%';
+      document.getElementById('seg-food').style.width      = (food/total*100)+'%';
+      document.getElementById('seg-extras').style.width    = (extras/total*100)+'%';
+      document.getElementById('seg-misc').style.width      = (misc/total*100)+'%';
     } else {
-      ['transport','hotel','parks','food','misc'].forEach(k =>
-        document.getElementById('seg-' + k).style.width = '0%');
+      ['transport','hotel','food','extras','misc'].forEach(k =>
+        document.getElementById('seg-'+k).style.width = '0%');
     }
 
     calcSettlement(total);
   }
 
-  // ── Links ──────────────────────────────────────────────
-  function updateLink(n) {
-    const input = document.getElementById('link' + n);
-    const btn   = document.getElementById('open' + n);
-    if (!input || !btn) return;
-    const url = input.value.trim();
-    if (url) { btn.href = url; btn.classList.remove('disabled'); }
-    else     { btn.href = '#'; btn.classList.add('disabled'); }
-    if (currentTrip()) { currentTrip().expenses['link' + n] = input.value; save(); }
-  }
-
-  // ── Reset expenses ─────────────────────────────────────
+  // ── Reset ──────────────────────────────────────────────
   function resetExpenses() {
     if (!confirm('Сбросить все расходы?')) return;
     const trip = currentTrip();
     if (!trip) return;
-    EXPENSE_KEYS.forEach(key => {
-      const el = document.getElementById(key);
-      if (el) el.value = '';
-    });
-    trip.expenses = {};
-    trip.payments = [];
-    trip.extras   = [];
-    [1,2,3].forEach(n => updateLink(n));
-    save();
-    renderPayments();
-    calc();
+    EXPENSE_KEYS.forEach(key => { const el = document.getElementById(key); if (el) el.value=''; });
+    trip.expenses = {}; trip.payments = []; trip.extras = []; trip.accommodations = [];
+    save(); renderAccommodations(); renderExtras(); renderPayments(); calc();
   }
 
   // ── Rates ──────────────────────────────────────────────
   async function fetchRates() {
-    const btn    = document.getElementById('refresh-btn');
+    const btn = document.getElementById('refresh-btn');
     const status = document.getElementById('rate-status');
     btn.disabled = true; btn.textContent = '↻ Загрузка…';
     status.className = 'rate-status'; status.textContent = '';
@@ -1157,7 +1142,7 @@
       const data = await res.json();
       document.getElementById('rate-rub').value = data.kzt.rub.toFixed(4);
       document.getElementById('rate-eur').value = data.kzt.eur.toFixed(6);
-      const now = new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+      const now = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
       status.textContent = `Курс обновлён в ${now}`;
       calc();
     } catch {
@@ -1168,7 +1153,6 @@
     }
   }
 
-  // ── Close modal on backdrop click ─────────────────────
   document.getElementById('modal-create').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeCreateModal();
   });
