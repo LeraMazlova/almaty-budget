@@ -231,33 +231,56 @@
     /* Accommodation blocks */
     .acc-block {
       background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px; margin-bottom: 10px;
+      border-radius: 12px; padding: 16px; margin-bottom: 10px;
+      position: relative;
     }
-    .acc-block-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .acc-block-header input[type="text"] {
+
+    .acc-remove {
+      position: absolute; top: 12px; right: 12px;
+      background: transparent; border: none; color: var(--muted);
+      cursor: pointer; font-size: 1rem; line-height: 1; padding: 2px 6px;
+      border-radius: 6px; transition: background 0.15s, color 0.15s;
+    }
+    .acc-remove:hover { background: rgba(248,113,113,0.12); color: var(--red); }
+
+    .acc-name-input {
       background: transparent; border: none; color: var(--text);
-      font-size: 0.95rem; font-weight: 600; outline: none; flex: 1; min-width: 0;
-      border-bottom: 1px solid var(--border); padding-bottom: 4px;
-      transition: border-color 0.2s;
+      font-size: 1rem; font-weight: 700; outline: none; width: calc(100% - 32px);
+      padding: 0 0 8px; border-bottom: 1px solid var(--border);
+      margin-bottom: 14px; transition: border-color 0.2s;
     }
-    .acc-block-header input[type="text"]:focus { border-color: var(--accent); }
-    .acc-block-header input[type="text"]::placeholder { color: #3d4460; font-weight: 400; }
+    .acc-name-input:focus { border-color: var(--accent); }
+    .acc-name-input::placeholder { color: #3d4460; font-weight: 400; font-size: 0.9rem; }
 
-    .acc-period-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+    .acc-dates-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
     }
-    .acc-period-field { display: flex; flex-direction: column; gap: 4px; }
-    .acc-period-field label { font-size: 0.75rem; color: var(--muted); }
+    .acc-date-field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .acc-date-field label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .acc-date-arrow { color: var(--muted); font-size: 1rem; margin-top: 18px; flex-shrink: 0; }
 
-    .night-select {
+    .acc-bottom-row { display: flex; align-items: center; gap: 10px; }
+    .acc-bottom-row .suffix { flex: 1; }
+    .acc-bottom-row .suffix input { font-size: 0.95rem; }
+
+    .acc-link-btn {
+      display: inline-flex; align-items: center; gap: 5px;
       background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text); font-size: 0.875rem; padding: 9px 10px;
-      outline: none; cursor: pointer; transition: border-color 0.2s; width: 100%;
+      color: var(--muted); text-decoration: none; font-size: 0.78rem; padding: 9px 12px;
+      white-space: nowrap; transition: border-color 0.2s, color 0.2s; flex-shrink: 0;
     }
-    .night-select:focus { border-color: var(--accent); }
+    .acc-link-btn:not(.has-link) { cursor: default; }
+    .acc-link-btn.has-link:hover { border-color: var(--accent); color: var(--accent); }
 
-    .acc-amount-row { display: flex; align-items: center; gap: 8px; }
-    .acc-amount-row .suffix { flex: 1; }
+    .acc-url-input {
+      display: none;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); font-size: 0.8rem; padding: 7px 12px; width: 100%;
+      outline: none; transition: border-color 0.2s, color 0.2s; margin-top: 10px;
+    }
+    .acc-url-input.visible { display: block; }
+    .acc-url-input:focus { border-color: var(--accent); color: var(--text); }
+    .acc-url-input::placeholder { color: #3d4460; }
 
     .acc-empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0; }
 
@@ -580,30 +603,11 @@
     window.scrollTo(0, 0);
   }
 
-  // Получить дату ночи по её номеру (1-based)
-  function nightDate(trip, nightNum) {
-    if (!trip.startDate) return null;
+  function isoDate(trip, offsetDays) {
+    if (!trip.startDate) return '';
     const d = new Date(trip.startDate);
-    d.setDate(d.getDate() + nightNum - 1);
-    return d;
-  }
-
-  function formatNight(trip, nightNum) {
-    const d = nightDate(trip, nightNum);
-    if (!d) return `Ночь ${nightNum}`;
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-  }
-
-  function nightOptions(trip, selectedNight) {
-    const nights = trip.nights || 3;
-    let html = '';
-    for (let i = 1; i <= nights; i++) {
-      html += `<option value="${i}" ${selectedNight === i ? 'selected' : ''}>${formatNight(trip, i)}</option>`;
-    }
-    // Extra option: after last night (checkout)
-    const checkout = nights + 1;
-    html += `<option value="${checkout}" ${selectedNight === checkout ? 'selected' : ''}>${formatNight(trip, checkout)} (выезд)</option>`;
-    return html;
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().slice(0, 10);
   }
 
   // ── Home ───────────────────────────────────────────────
@@ -743,55 +747,77 @@
       const block = document.createElement('div');
       block.className = 'acc-block';
 
-      const hasDate = !!trip.startDate;
-      const periodFrom = hasDate
-        ? `<input type="date" value="${acc.checkIn || ''}"
-                  oninput="updateAcc(${acc.id},'checkIn',this.value)" />`
-        : `<select class="night-select" onchange="updateAcc(${acc.id},'nightFrom',this.value)">
-             ${nightOptions(trip, acc.nightFrom || 1)}
-           </select>`;
-      const periodTo = hasDate
-        ? `<input type="date" value="${acc.checkOut || ''}"
-                  oninput="updateAcc(${acc.id},'checkOut',this.value)" />`
-        : `<select class="night-select" onchange="updateAcc(${acc.id},'nightTo',this.value)">
-             ${nightOptions(trip, acc.nightTo || (trip.nights || 3))}
-           </select>`;
-
-      const linkUrl = acc.link || '';
-      const linkDisabled = linkUrl ? '' : 'disabled';
+      const linkUrl    = acc.link || '';
+      const hasLink    = !!linkUrl;
+      const urlVisible = acc.showUrl ? 'visible' : '';
 
       block.innerHTML = `
-        <div class="acc-block-header">
-          <input type="text" value="${escHtml(acc.name)}"
-                 placeholder="Название (Hilton, Airbnb на Абая…)"
-                 oninput="updateAcc(${acc.id},'name',this.value)" />
-          <button class="remove-btn" onclick="removeAcc(${acc.id})">×</button>
-        </div>
-        <div class="acc-period-row">
-          <div class="acc-period-field">
-            <label>${hasDate ? 'Дата заезда' : 'Заезд'}</label>
-            ${periodFrom}
+        <button class="acc-remove" onclick="removeAcc(${acc.id})">×</button>
+        <input type="text" class="acc-name-input" value="${escHtml(acc.name)}"
+               placeholder="Название — Airbnb на Абая, Hilton…"
+               oninput="updateAcc(${acc.id},'name',this.value)" />
+
+        <div class="acc-dates-row">
+          <div class="acc-date-field">
+            <label>Заезд</label>
+            <input type="date" value="${acc.checkIn || ''}"
+                   oninput="updateAcc(${acc.id},'checkIn',this.value)" />
           </div>
-          <div class="acc-period-field">
-            <label>${hasDate ? 'Дата выезда' : 'Выезд'}</label>
-            ${periodTo}
+          <div class="acc-date-arrow">→</div>
+          <div class="acc-date-field">
+            <label>Выезд</label>
+            <input type="date" value="${acc.checkOut || ''}"
+                   oninput="updateAcc(${acc.id},'checkOut',this.value)" />
           </div>
         </div>
-        <div class="acc-amount-row">
-          <div class="suffix" style="flex:1">
+
+        <div class="acc-bottom-row">
+          <div class="suffix">
             <input type="number" value="${acc.amount || ''}" placeholder="0" min="0"
                    oninput="updateAcc(${acc.id},'amount',this.value)" />
             <span>₸</span>
           </div>
+          <a id="acc-link-${acc.id}" class="acc-link-btn ${hasLink ? 'has-link' : ''}"
+             href="${escHtml(linkUrl) || '#'}" target="${hasLink ? '_blank' : '_self'}"
+             rel="noopener" onclick="accLinkClick(event,${acc.id})">
+            🔗 ${hasLink ? 'Открыть' : 'Ссылка'}
+          </a>
         </div>
-        <div class="link-row" style="margin-top:8px;">
-          <input type="url" value="${escHtml(linkUrl)}" placeholder="Ссылка Booking / Airbnb…"
-                 oninput="updateAcc(${acc.id},'link',this.value);updateAccLink(${acc.id},this)" />
-          <a id="acc-link-${acc.id}" class="open-link ${linkDisabled}"
-             href="${escHtml(linkUrl) || '#'}" target="_blank" rel="noopener">↗</a>
-        </div>`;
+        <input type="url" class="acc-url-input ${urlVisible}" id="acc-url-${acc.id}"
+               value="${escHtml(linkUrl)}" placeholder="Вставь ссылку Booking / Airbnb…"
+               oninput="updateAcc(${acc.id},'link',this.value);refreshAccLink(${acc.id})" />`;
+
       el.appendChild(block);
     });
+  }
+
+  function accLinkClick(e, id) {
+    const acc = currentTrip()?.accommodations.find(a => a.id === id);
+    if (!acc) return;
+    if (acc.link) return; // let href work
+    e.preventDefault();
+    acc.showUrl = !acc.showUrl;
+    save();
+    renderAccommodations();
+  }
+
+  function refreshAccLink(id) {
+    const trip = currentTrip();
+    if (!trip) return;
+    const acc = trip.accommodations.find(a => a.id === id);
+    if (!acc) return;
+    const url = document.getElementById('acc-url-' + id)?.value.trim() || '';
+    acc.link = url;
+    const btn = document.getElementById('acc-link-' + id);
+    if (!btn) return;
+    if (url) {
+      btn.href = url; btn.classList.add('has-link');
+      btn.setAttribute('target','_blank'); btn.textContent = '🔗 Открыть';
+    } else {
+      btn.href = '#'; btn.classList.remove('has-link');
+      btn.setAttribute('target','_self'); btn.textContent = '🔗 Ссылка';
+    }
+    save();
   }
 
   function addAccommodation() {
@@ -800,9 +826,9 @@
     const nights = trip.nights || 3;
     trip.accommodations.push({
       id: trip.nextAccId++, name: '',
-      nightFrom: 1, nightTo: nights,
-      checkIn: '', checkOut: '',
-      amount: 0, link: ''
+      checkIn:  isoDate(trip, 0),
+      checkOut: isoDate(trip, nights),
+      amount: 0, link: '', showUrl: false
     });
     save(); renderAccommodations();
   }
@@ -819,19 +845,8 @@
     if (!trip) return;
     const acc = trip.accommodations.find(a => a.id === id);
     if (!acc) return;
-    if (field === 'amount') acc.amount = parseFloat(value) || 0;
-    else if (field === 'nightFrom') acc.nightFrom = parseInt(value);
-    else if (field === 'nightTo')   acc.nightTo   = parseInt(value);
-    else acc[field] = value;
+    acc[field] = field === 'amount' ? (parseFloat(value) || 0) : value;
     save(); calc();
-  }
-
-  function updateAccLink(id, input) {
-    const btn = document.getElementById('acc-link-' + id);
-    if (!btn) return;
-    const url = input.value.trim();
-    if (url) { btn.href = url; btn.classList.remove('disabled'); }
-    else     { btn.href = '#'; btn.classList.add('disabled'); }
   }
 
   // ── Extra expenses ─────────────────────────────────────
