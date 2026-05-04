@@ -279,6 +279,81 @@
       margin: 16px 0;
     }
 
+    /* Currency rates */
+    .rates-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .rate-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .rate-label { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+    .rate-cur { color: var(--muted); font-size: 0.85rem; }
+
+    .rate-field input[type="number"] {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      width: 80px;
+      text-align: right;
+    }
+
+    .rate-field input[type="number"]:focus { border: none; outline: none; }
+
+    /* Convert grid */
+    .convert-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 500px) { .convert-grid { grid-template-columns: 1fr; } }
+
+    .convert-col {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .convert-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+    }
+
+    .convert-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .convert-row span:last-child {
+      font-weight: 600;
+      color: var(--text);
+    }
+
     /* Link input */
     .link-row {
       display: flex;
@@ -528,6 +603,36 @@
       </div>
     </div>
 
+    <!-- Курсы валют -->
+    <div class="rates-row">
+      <div class="rate-field">
+        <span class="rate-label">1 ₸ =</span>
+        <input type="number" id="rate-rub" value="0.19" step="0.001" min="0" oninput="calc()" />
+        <span class="rate-cur">₽</span>
+      </div>
+      <div class="rate-field">
+        <span class="rate-label">1 ₸ =</span>
+        <input type="number" id="rate-eur" value="0.0019" step="0.0001" min="0" oninput="calc()" />
+        <span class="rate-cur">€</span>
+      </div>
+    </div>
+
+    <!-- Конвертация -->
+    <div class="convert-grid">
+      <div class="convert-col">
+        <div class="convert-title">Российский рубль ₽</div>
+        <div class="convert-row"><span>Общий</span><span id="c-total-rub">0 ₽</span></div>
+        <div class="convert-row"><span id="c-pp-label-rub">На человека</span><span id="c-pp-rub">0 ₽</span></div>
+        <div class="convert-row"><span>В день / чел.</span><span id="c-pd-rub">0 ₽</span></div>
+      </div>
+      <div class="convert-col">
+        <div class="convert-title">Евро €</div>
+        <div class="convert-row"><span>Общий</span><span id="c-total-eur">0 €</span></div>
+        <div class="convert-row"><span id="c-pp-label-eur">На человека</span><span id="c-pp-eur">0 €</span></div>
+        <div class="convert-row"><span>В день / чел.</span><span id="c-pd-eur">0 €</span></div>
+      </div>
+    </div>
+
     <div class="divider"></div>
 
     <!-- Breakdown -->
@@ -603,6 +708,25 @@
     document.getElementById('b-parks').textContent = fmt(parks);
     document.getElementById('b-food').textContent = fmt(food);
     document.getElementById('b-misc').textContent = fmt(misc);
+
+    // Currency conversion
+    const rub = v('rate-rub');
+    const eur = v('rate-eur');
+
+    const fmtRub = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+    const fmtEur = n => new Intl.NumberFormat('ru-RU', {minimumFractionDigits: 0, maximumFractionDigits: 0}).format(n) + ' €';
+
+    document.getElementById('c-total-rub').textContent = fmtRub(total * rub);
+    document.getElementById('c-pp-rub').textContent    = fmtRub(perPerson * rub);
+    document.getElementById('c-pd-rub').textContent    = fmtRub(perDay * rub);
+
+    document.getElementById('c-total-eur').textContent = fmtEur(total * eur);
+    document.getElementById('c-pp-eur').textContent    = fmtEur(perPerson * eur);
+    document.getElementById('c-pd-eur').textContent    = fmtEur(perDay * eur);
+
+    const ppLabel = people === 1 ? 'На человека' : `На чел. (из ${people})`;
+    document.getElementById('c-pp-label-rub').textContent = ppLabel;
+    document.getElementById('c-pp-label-eur').textContent = ppLabel;
 
     // Bar
     if (total > 0) {
