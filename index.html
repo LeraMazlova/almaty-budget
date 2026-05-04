@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Бюджет · Алматы 3 дня</title>
+  <title>Бюджет поездки</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,13 +30,20 @@
       padding: 24px 16px 48px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 32px;
+    /* ── Views ── */
+    .view { display: none; max-width: 900px; margin: 0 auto; }
+    .view.active { display: block; }
+
+    /* ── Home ── */
+    .home-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
     }
 
-    header h1 {
-      font-size: 1.9rem;
+    .home-header h1 {
+      font-size: 1.6rem;
       font-weight: 700;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       -webkit-background-clip: text;
@@ -44,16 +51,181 @@
       background-clip: text;
     }
 
-    header p { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 10px 18px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
 
+    .trips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .trip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+      position: relative;
+    }
+    .trip-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .trip-card-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .trip-card-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .trip-card-delete {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      line-height: 1;
+      padding: 4px;
+    }
+    .trip-card:hover .trip-card-delete { opacity: 1; }
+    .trip-card-delete:hover { color: var(--red); }
+
+    .no-trips {
+      text-align: center;
+      color: var(--muted);
+      padding: 60px 20px;
+      font-size: 0.95rem;
+    }
+
+    /* ── Create modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-backdrop.hidden { display: none; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .modal h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .modal-label { font-size: 0.8rem; color: var(--muted); }
+
+    .modal-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+
+    .modal-participants { margin-bottom: 16px; }
+    .modal-participant-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.875rem;
+      padding: 9px 16px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+    /* ── Trip view ── */
+    .trip-topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .back-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 8px 14px;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .trip-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Grid & cards ── */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      max-width: 900px;
-      margin: 0 auto;
     }
-
     @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
 
     .card {
@@ -62,7 +234,6 @@
       border-radius: var(--radius);
       padding: 20px;
     }
-
     .card.full { grid-column: 1 / -1; }
 
     .card-title {
@@ -78,9 +249,7 @@
     }
 
     .input-row { display: flex; flex-direction: column; gap: 10px; }
-
     .field { display: flex; flex-direction: column; gap: 4px; }
-
     label { font-size: 0.8rem; color: var(--muted); }
 
     input[type="number"] {
@@ -95,7 +264,6 @@
       transition: border-color 0.2s;
       -moz-appearance: textfield;
     }
-
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
     input[type="number"]:focus { border-color: var(--accent); }
@@ -103,52 +271,29 @@
     .suffix { position: relative; }
     .suffix input { padding-right: 46px; }
     .suffix span {
-      position: absolute;
-      right: 14px;
-      top: 50%;
+      position: absolute; right: 14px; top: 50%;
       transform: translateY(-50%);
-      color: var(--muted);
-      font-size: 0.85rem;
-      pointer-events: none;
+      color: var(--muted); font-size: 0.85rem; pointer-events: none;
     }
 
     /* Totals */
-    .totals {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
+    .totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     @media (max-width: 500px) { .totals { grid-template-columns: 1fr; } }
 
-    .total-box {
-      background: var(--surface2);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-    }
-
+    .total-box { background: var(--surface2); border-radius: 10px; padding: 16px; text-align: center; }
     .total-box .label { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
     .total-box .amount { font-size: 1.55rem; font-weight: 700; }
     .total-box .amount.main { color: var(--accent); }
     .total-box .amount.per-person { color: var(--green); }
     .total-box .amount.days { color: var(--yellow); }
 
-    /* Bar */
     .bar-wrap { margin-top: 16px; }
-    .bar-track {
-      height: 10px;
-      border-radius: 99px;
-      background: var(--surface2);
-      overflow: hidden;
-      display: flex;
-    }
+    .bar-track { height: 10px; border-radius: 99px; background: var(--surface2); overflow: hidden; display: flex; }
     .bar-seg { height: 100%; transition: width 0.4s ease; }
     .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--muted); }
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-    /* Breakdown */
     .breakdown-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .bline { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; }
     .bline-name { color: var(--muted); }
@@ -156,184 +301,76 @@
 
     .divider { height: 1px; background: var(--border); margin: 16px 0; }
 
-    /* Currency rates */
-    .rates-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-
+    /* Rates */
+    .rates-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
     .rate-field {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      flex: 1;
-      min-width: 160px;
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px; flex: 1; min-width: 160px;
     }
-
     .rate-label { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
     .rate-cur { color: var(--muted); font-size: 0.85rem; }
-
     .rate-field input[type="number"] {
-      background: transparent;
-      border: none;
-      padding: 0;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text);
-      width: 80px;
-      text-align: right;
+      background: transparent; border: none; padding: 0;
+      font-size: 0.95rem; font-weight: 600; color: var(--text); width: 80px; text-align: right;
     }
     .rate-field input[type="number"]:focus { border: none; outline: none; }
-
     .refresh-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 6px 14px;
-      transition: border-color 0.2s, color 0.2s;
-      white-space: nowrap;
-      align-self: center;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 6px 14px;
+      transition: border-color 0.2s, color 0.2s; white-space: nowrap; align-self: center;
     }
     .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
     .refresh-btn:disabled { opacity: 0.4; cursor: default; }
-
     .rate-status { font-size: 0.75rem; color: var(--muted); margin-top: 6px; min-height: 16px; }
     .rate-status.error { color: var(--red); }
 
-    /* Convert grid */
-    .convert-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
+    .convert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
     @media (max-width: 500px) { .convert-grid { grid-template-columns: 1fr; } }
-
     .convert-col { background: var(--surface2); border-radius: 10px; padding: 14px; }
-    .convert-title {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 10px;
-    }
-    .convert-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
+    .convert-title { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .convert-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 6px; color: var(--muted); }
     .convert-row span:last-child { font-weight: 600; color: var(--text); }
 
-    /* Link input */
+    /* Links */
     .link-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
-
     input[type="url"] {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-size: 0.8rem;
-      padding: 7px 12px;
-      width: 100%;
-      outline: none;
-      transition: border-color 0.2s, color 0.2s;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); font-size: 0.8rem; padding: 7px 12px; width: 100%;
+      outline: none; transition: border-color 0.2s, color 0.2s;
     }
     input[type="url"]:focus { border-color: var(--accent); color: var(--text); }
     input[type="url"]::placeholder { color: #3d4460; }
-
     .open-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+      text-decoration: none; font-size: 0.85rem; transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
     .open-link:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
     .open-link.disabled { pointer-events: none; opacity: 0.3; }
 
-    /* Reset button */
-    .reset-btn {
-      margin-top: 14px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 8px 16px;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .reset-btn:hover { border-color: var(--red); color: var(--red); }
-
-    /* Participants */
-    .participant-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
+    /* Participants in trip */
+    .participant-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .participant-name {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.9rem;
-      padding: 9px 12px;
-      flex: 1;
-      outline: none;
-      transition: border-color 0.2s;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.9rem; padding: 9px 12px; flex: 1;
+      outline: none; transition: border-color 0.2s;
     }
     .participant-name:focus { border-color: var(--accent); }
 
     .remove-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 1rem;
-      width: 34px;
-      height: 34px;
-      flex-shrink: 0;
-      transition: border-color 0.2s, color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: transparent; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); cursor: pointer; font-size: 1rem; width: 34px; height: 34px;
+      flex-shrink: 0; transition: border-color 0.2s, color 0.2s;
+      display: flex; align-items: center; justify-content: center;
     }
     .remove-btn:hover { border-color: var(--red); color: var(--red); }
 
     .add-btn {
-      background: transparent;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.82rem;
-      padding: 8px 14px;
-      transition: border-color 0.2s, color 0.2s;
-      margin-top: 4px;
+      background: transparent; border: 1px dashed var(--border); border-radius: 8px;
+      color: var(--muted); cursor: pointer; font-size: 0.82rem; padding: 8px 14px;
+      transition: border-color 0.2s, color 0.2s; margin-top: 4px;
     }
     .add-btn:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -341,498 +378,498 @@
     .payment-row {
       display: grid;
       grid-template-columns: 1fr 120px 1fr auto;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
+      gap: 8px; align-items: center; margin-bottom: 8px;
     }
-
     @media (max-width: 600px) {
-      .payment-row {
-        grid-template-columns: 1fr 1fr auto;
-        grid-template-rows: auto auto;
-      }
+      .payment-row { grid-template-columns: 1fr 1fr auto; grid-template-rows: auto auto; }
       .payment-row .pay-note { grid-column: 1 / 3; }
     }
-
     .payment-row select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.875rem;
-      padding: 9px 10px;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.875rem; padding: 9px 10px;
+      outline: none; cursor: pointer; transition: border-color 0.2s;
     }
     .payment-row select:focus { border-color: var(--accent); }
-
     .pay-amount-wrap { position: relative; }
     .pay-amount-wrap input { padding-right: 30px; font-size: 0.9rem; padding-top: 9px; padding-bottom: 9px; }
     .pay-amount-wrap span {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      font-size: 0.8rem;
-      pointer-events: none;
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 0.8rem; pointer-events: none;
     }
-
     .pay-note {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.875rem;
-      padding: 9px 12px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.875rem; padding: 9px 12px;
+      outline: none; transition: border-color 0.2s; width: 100%;
     }
     .pay-note:focus { border-color: var(--accent); }
     .pay-note::placeholder { color: #3d4460; }
-
     .payments-empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0; }
 
     /* Settlement */
-    .settlement-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 4px;
-      font-size: 0.875rem;
-    }
-
+    .settlement-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 0.875rem; }
     .settlement-table th {
-      text-align: left;
-      color: var(--muted);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding-bottom: 10px;
+      text-align: left; color: var(--muted); font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 10px;
       border-bottom: 1px solid var(--border);
     }
-
-    .settlement-table td {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .settlement-table td { padding: 10px 0; border-bottom: 1px solid var(--border); }
     .settlement-table tr:last-child td { border-bottom: none; }
-
     .bal-pos { color: var(--green); font-weight: 600; }
     .bal-neg { color: var(--red); font-weight: 600; }
     .bal-zero { color: var(--muted); font-weight: 600; }
 
-    .transfers {
-      margin-top: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
+    .transfers { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
     .transfer-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface2);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 0.875rem;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2); border-radius: 8px; padding: 10px 14px; font-size: 0.875rem;
     }
-
     .transfer-arrow { color: var(--muted); }
     .transfer-amount { margin-left: auto; font-weight: 700; color: var(--accent); }
-
     .settlement-empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0; }
+
+    .reset-btn {
+      margin-top: 14px; background: transparent; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--muted); cursor: pointer; font-size: 0.8rem;
+      padding: 8px 16px; transition: border-color 0.2s, color 0.2s;
+    }
+    .reset-btn:hover { border-color: var(--red); color: var(--red); }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>🏔 Алматы · 3 дня</h1>
-  <p>Трекер бюджета на поездку</p>
-</header>
+<!-- ── HOME ── -->
+<div id="view-home" class="view active">
+  <div class="home-header">
+    <h1>✈️ Мои поездки</h1>
+    <button class="btn-primary" onclick="openCreateModal()">+ Новая поездка</button>
+  </div>
+  <div id="trips-grid" class="trips-grid"></div>
+</div>
 
-<div class="grid">
-
-  <!-- Транспорт -->
-  <div class="card">
-    <div class="card-title"><span>🚗</span> Транспорт</div>
-    <div class="input-row">
-      <div class="field">
-        <label>Аренда машины (всего)</label>
-        <div class="suffix">
-          <input type="number" id="car" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Бензин (всего)</label>
-        <div class="suffix">
-          <input type="number" id="fuel" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Парковки / прочее</label>
-        <div class="suffix">
-          <input type="number" id="parking" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-    </div>
+<!-- ── TRIP ── -->
+<div id="view-trip" class="view">
+  <div class="trip-topbar">
+    <button class="back-btn" onclick="goHome()">← Назад</button>
+    <div class="trip-title" id="trip-title"></div>
   </div>
 
-  <!-- Проживание -->
-  <div class="card">
-    <div class="card-title"><span>🏨</span> Проживание</div>
-    <div class="input-row">
-      <div class="field">
-        <label>Ночь 1 — отель / хостел</label>
-        <div class="suffix">
-          <input type="number" id="hotel1" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
+  <div class="grid">
+
+    <!-- Транспорт -->
+    <div class="card">
+      <div class="card-title"><span>🚗</span> Транспорт</div>
+      <div class="input-row">
+        <div class="field"><label>Аренда машины (всего)</label>
+          <div class="suffix"><input type="number" id="car" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Бензин (всего)</label>
+          <div class="suffix"><input type="number" id="fuel" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Парковки / прочее</label>
+          <div class="suffix"><input type="number" id="parking" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+      </div>
+    </div>
+
+    <!-- Проживание -->
+    <div class="card">
+      <div class="card-title"><span>🏨</span> Проживание</div>
+      <div class="input-row">
+        <div class="field"><label>Ночь 1 — отель / хостел</label>
+          <div class="suffix"><input type="number" id="hotel1" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div>
+          <div class="link-row"><input type="url" id="link1" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(1)" />
+            <a id="open1" class="open-link disabled" target="_blank" rel="noopener">↗</a></div></div>
+        <div class="field"><label>Ночь 2 — отель / хостел</label>
+          <div class="suffix"><input type="number" id="hotel2" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div>
+          <div class="link-row"><input type="url" id="link2" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(2)" />
+            <a id="open2" class="open-link disabled" target="_blank" rel="noopener">↗</a></div></div>
+        <div class="field"><label>Ночь 3 — отель / хостел</label>
+          <div class="suffix"><input type="number" id="hotel3" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div>
+          <div class="link-row"><input type="url" id="link3" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(3)" />
+            <a id="open3" class="open-link disabled" target="_blank" rel="noopener">↗</a></div></div>
+      </div>
+    </div>
+
+    <!-- Парки -->
+    <div class="card full">
+      <div class="card-title"><span>🏞</span> Парки и достопримечательности</div>
+      <div class="grid" style="gap:10px;">
+        <div class="field"><label>Чарынский каньон — вход (на всех)</label>
+          <div class="suffix"><input type="number" id="charyn" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Кольсай — вход (на всех)</label>
+          <div class="suffix"><input type="number" id="kolsai" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Фуникулёр Медеу (на всех)</label>
+          <div class="suffix"><input type="number" id="medeu" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Прочие входные билеты</label>
+          <div class="suffix"><input type="number" id="tickets_other" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+      </div>
+    </div>
+
+    <!-- Питание -->
+    <div class="card">
+      <div class="card-title"><span>🍽</span> Питание</div>
+      <div class="input-row">
+        <div class="field"><label>День 1</label>
+          <div class="suffix"><input type="number" id="food1" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>День 2</label>
+          <div class="suffix"><input type="number" id="food2" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>День 3</label>
+          <div class="suffix"><input type="number" id="food3" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+      </div>
+    </div>
+
+    <!-- Прочее -->
+    <div class="card">
+      <div class="card-title"><span>💼</span> Прочее</div>
+      <div class="input-row">
+        <div class="field"><label>Сувениры / шопинг</label>
+          <div class="suffix"><input type="number" id="souvenirs" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Непредвиденные расходы</label>
+          <div class="suffix"><input type="number" id="misc" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+        <div class="field"><label>Страховка</label>
+          <div class="suffix"><input type="number" id="insurance" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
+      </div>
+    </div>
+
+    <!-- Итоги -->
+    <div class="card full">
+      <div class="card-title"><span>📊</span> Итого</div>
+      <div class="totals">
+        <div class="total-box"><div class="label">Общий бюджет</div><div class="amount main" id="total">0 ₸</div></div>
+        <div class="total-box"><div class="label" id="per-person-label">На человека</div><div class="amount per-person" id="per-person">0 ₸</div></div>
+        <div class="total-box"><div class="label">В день на человека</div><div class="amount days" id="per-day">0 ₸</div></div>
+      </div>
+
+      <div class="rates-row">
+        <div class="rate-field">
+          <span class="rate-label">1 ₸ =</span>
+          <input type="number" id="rate-rub" value="0.19" step="0.001" min="0" oninput="calc()" />
+          <span class="rate-cur">₽</span>
         </div>
-        <div class="link-row">
-          <input type="url" id="link1" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(1)" />
-          <a id="open1" class="open-link disabled" target="_blank" rel="noopener">↗</a>
+        <div class="rate-field">
+          <span class="rate-label">1 ₸ =</span>
+          <input type="number" id="rate-eur" value="0.0019" step="0.0001" min="0" oninput="calc()" />
+          <span class="rate-cur">€</span>
+        </div>
+        <button class="refresh-btn" onclick="fetchRates()" id="refresh-btn">↻ Обновить курс</button>
+      </div>
+      <div id="rate-status" class="rate-status"></div>
+
+      <div class="convert-grid">
+        <div class="convert-col">
+          <div class="convert-title">Российский рубль ₽</div>
+          <div class="convert-row"><span>Общий</span><span id="c-total-rub">0 ₽</span></div>
+          <div class="convert-row"><span id="c-pp-label-rub">На человека</span><span id="c-pp-rub">0 ₽</span></div>
+          <div class="convert-row"><span>В день / чел.</span><span id="c-pd-rub">0 ₽</span></div>
+        </div>
+        <div class="convert-col">
+          <div class="convert-title">Евро €</div>
+          <div class="convert-row"><span>Общий</span><span id="c-total-eur">0 €</span></div>
+          <div class="convert-row"><span id="c-pp-label-eur">На человека</span><span id="c-pp-eur">0 €</span></div>
+          <div class="convert-row"><span>В день / чел.</span><span id="c-pd-eur">0 €</span></div>
         </div>
       </div>
-      <div class="field">
-        <label>Ночь 2 — отель / хостел</label>
-        <div class="suffix">
-          <input type="number" id="hotel2" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
+
+      <div class="divider"></div>
+
+      <div class="breakdown-list">
+        <div class="bline"><span class="bline-name">🚗 Транспорт</span><span class="bline-val" id="b-transport">0 ₸</span></div>
+        <div class="bline"><span class="bline-name">🏨 Проживание</span><span class="bline-val" id="b-hotel">0 ₸</span></div>
+        <div class="bline"><span class="bline-name">🏞 Парки</span><span class="bline-val" id="b-parks">0 ₸</span></div>
+        <div class="bline"><span class="bline-name">🍽 Питание</span><span class="bline-val" id="b-food">0 ₸</span></div>
+        <div class="bline"><span class="bline-name">💼 Прочее</span><span class="bline-val" id="b-misc">0 ₸</span></div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-track">
+          <div class="bar-seg" id="seg-transport" style="background:#6c8ef5;width:0%"></div>
+          <div class="bar-seg" id="seg-hotel"     style="background:#a78bfa;width:0%"></div>
+          <div class="bar-seg" id="seg-parks"     style="background:#34d399;width:0%"></div>
+          <div class="bar-seg" id="seg-food"      style="background:#fbbf24;width:0%"></div>
+          <div class="bar-seg" id="seg-misc"      style="background:#f87171;width:0%"></div>
         </div>
-        <div class="link-row">
-          <input type="url" id="link2" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(2)" />
-          <a id="open2" class="open-link disabled" target="_blank" rel="noopener">↗</a>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#6c8ef5"></div>Транспорт</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Проживание</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Парки</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Питание</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Прочее</div>
         </div>
       </div>
-      <div class="field">
-        <label>Ночь 3 — отель / хостел</label>
-        <div class="suffix">
-          <input type="number" id="hotel3" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-        <div class="link-row">
-          <input type="url" id="link3" placeholder="Ссылка Booking / Airbnb…" oninput="updateLink(3)" />
-          <a id="open3" class="open-link disabled" target="_blank" rel="noopener">↗</a>
-        </div>
-      </div>
+
+      <button class="reset-btn" onclick="resetExpenses()">Сбросить расходы</button>
+    </div>
+
+    <!-- Участники -->
+    <div class="card full">
+      <div class="card-title"><span>👥</span> Участники</div>
+      <div id="participants-list"></div>
+      <button class="add-btn" onclick="addParticipant()">+ Добавить участника</button>
+    </div>
+
+    <!-- Кто платил -->
+    <div class="card full">
+      <div class="card-title"><span>💳</span> Кто платил</div>
+      <div id="payments-list"></div>
+      <button class="add-btn" onclick="addPayment()" style="margin-top:10px;">+ Добавить платёж</button>
+    </div>
+
+    <!-- Расчёт -->
+    <div class="card full">
+      <div class="card-title"><span>⚖️</span> Расчёт между участниками</div>
+      <div id="settlement-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODAL: create trip ── -->
+<div id="modal-create" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>Новая поездка</h2>
+
+    <div class="modal-field">
+      <div class="modal-label">Название</div>
+      <input type="text" class="modal-input" id="new-trip-name" placeholder="Алматы · Май 2026" />
+    </div>
+
+    <div class="modal-label" style="margin-bottom:10px;">Участники</div>
+    <div id="modal-participants"></div>
+    <button class="add-btn" onclick="modalAddParticipant()">+ Добавить участника</button>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCreateModal()">Отмена</button>
+      <button class="btn-primary" onclick="createTrip()">Создать</button>
     </div>
   </div>
-
-  <!-- Парки -->
-  <div class="card full">
-    <div class="card-title"><span>🏞</span> Парки и достопримечательности</div>
-    <div class="grid" style="gap:10px;">
-      <div class="field">
-        <label>Чарынский каньон — вход (на всех)</label>
-        <div class="suffix">
-          <input type="number" id="charyn" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Кольсай — вход (на всех)</label>
-        <div class="suffix">
-          <input type="number" id="kolsai" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Фуникулёр Медеу (на всех)</label>
-        <div class="suffix">
-          <input type="number" id="medeu" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Прочие входные билеты</label>
-        <div class="suffix">
-          <input type="number" id="tickets_other" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Питание -->
-  <div class="card">
-    <div class="card-title"><span>🍽</span> Питание</div>
-    <div class="input-row">
-      <div class="field">
-        <label>День 1</label>
-        <div class="suffix">
-          <input type="number" id="food1" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>День 2</label>
-        <div class="suffix">
-          <input type="number" id="food2" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>День 3</label>
-        <div class="suffix">
-          <input type="number" id="food3" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Прочее -->
-  <div class="card">
-    <div class="card-title"><span>💼</span> Прочее</div>
-    <div class="input-row">
-      <div class="field">
-        <label>Сувениры / шопинг</label>
-        <div class="suffix">
-          <input type="number" id="souvenirs" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Непредвиденные расходы</label>
-        <div class="suffix">
-          <input type="number" id="misc" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>Страховка</label>
-        <div class="suffix">
-          <input type="number" id="insurance" placeholder="0" min="0" oninput="calc()" />
-          <span>₸</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Итоги -->
-  <div class="card full">
-    <div class="card-title"><span>📊</span> Итого</div>
-
-    <div class="totals">
-      <div class="total-box">
-        <div class="label">Общий бюджет</div>
-        <div class="amount main" id="total">0 ₸</div>
-      </div>
-      <div class="total-box">
-        <div class="label" id="per-person-label">На человека</div>
-        <div class="amount per-person" id="per-person">0 ₸</div>
-      </div>
-      <div class="total-box">
-        <div class="label">В день на человека</div>
-        <div class="amount days" id="per-day">0 ₸</div>
-      </div>
-    </div>
-
-    <!-- Курсы -->
-    <div class="rates-row">
-      <div class="rate-field">
-        <span class="rate-label">1 ₸ =</span>
-        <input type="number" id="rate-rub" value="0.19" step="0.001" min="0" oninput="calc()" />
-        <span class="rate-cur">₽</span>
-      </div>
-      <div class="rate-field">
-        <span class="rate-label">1 ₸ =</span>
-        <input type="number" id="rate-eur" value="0.0019" step="0.0001" min="0" oninput="calc()" />
-        <span class="rate-cur">€</span>
-      </div>
-      <button class="refresh-btn" onclick="fetchRates()" id="refresh-btn">↻ Обновить курс</button>
-    </div>
-    <div id="rate-status" class="rate-status"></div>
-
-    <div class="convert-grid">
-      <div class="convert-col">
-        <div class="convert-title">Российский рубль ₽</div>
-        <div class="convert-row"><span>Общий</span><span id="c-total-rub">0 ₽</span></div>
-        <div class="convert-row"><span id="c-pp-label-rub">На человека</span><span id="c-pp-rub">0 ₽</span></div>
-        <div class="convert-row"><span>В день / чел.</span><span id="c-pd-rub">0 ₽</span></div>
-      </div>
-      <div class="convert-col">
-        <div class="convert-title">Евро €</div>
-        <div class="convert-row"><span>Общий</span><span id="c-total-eur">0 €</span></div>
-        <div class="convert-row"><span id="c-pp-label-eur">На человека</span><span id="c-pp-eur">0 €</span></div>
-        <div class="convert-row"><span>В день / чел.</span><span id="c-pd-eur">0 €</span></div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="breakdown-list">
-      <div class="bline"><span class="bline-name">🚗 Транспорт</span><span class="bline-val" id="b-transport">0 ₸</span></div>
-      <div class="bline"><span class="bline-name">🏨 Проживание</span><span class="bline-val" id="b-hotel">0 ₸</span></div>
-      <div class="bline"><span class="bline-name">🏞 Парки и аттракции</span><span class="bline-val" id="b-parks">0 ₸</span></div>
-      <div class="bline"><span class="bline-name">🍽 Питание</span><span class="bline-val" id="b-food">0 ₸</span></div>
-      <div class="bline"><span class="bline-name">💼 Прочее</span><span class="bline-val" id="b-misc">0 ₸</span></div>
-    </div>
-
-    <div class="bar-wrap">
-      <div class="bar-track">
-        <div class="bar-seg" id="seg-transport" style="background:#6c8ef5;width:0%"></div>
-        <div class="bar-seg" id="seg-hotel" style="background:#a78bfa;width:0%"></div>
-        <div class="bar-seg" id="seg-parks" style="background:#34d399;width:0%"></div>
-        <div class="bar-seg" id="seg-food" style="background:#fbbf24;width:0%"></div>
-        <div class="bar-seg" id="seg-misc" style="background:#f87171;width:0%"></div>
-      </div>
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#6c8ef5"></div>Транспорт</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Проживание</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Парки</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Питание</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Прочее</div>
-      </div>
-    </div>
-
-    <button class="reset-btn" onclick="resetAll()">Сбросить всё</button>
-  </div>
-
-  <!-- Участники -->
-  <div class="card full">
-    <div class="card-title"><span>👥</span> Участники</div>
-    <div id="participants-list"></div>
-    <button class="add-btn" onclick="addParticipant()">+ Добавить участника</button>
-  </div>
-
-  <!-- Кто платил -->
-  <div class="card full">
-    <div class="card-title"><span>💳</span> Кто платил</div>
-    <div id="payments-list"></div>
-    <button class="add-btn" onclick="addPayment()" style="margin-top:10px;">+ Добавить платёж</button>
-  </div>
-
-  <!-- Расчёт -->
-  <div class="card full">
-    <div class="card-title"><span>⚖️</span> Расчёт между участниками</div>
-    <div id="settlement-content"></div>
-  </div>
-
 </div>
 
 <script>
-  // ── State ──────────────────────────────────────────────
-  let participants = [
-    { id: 1, name: 'Участник 1' },
-    { id: 2, name: 'Участник 2' }
-  ];
-  let payments = [];
-  let nextPId  = 3;
-  let nextPayId = 1;
+  // ── App state ──────────────────────────────────────────
+  const STORE_KEY = 'travel-budget-app';
 
-  const EXPENSE_IDS = ['car','fuel','parking','hotel1','hotel2','hotel3',
-                       'charyn','kolsai','medeu','tickets_other',
-                       'food1','food2','food3','souvenirs','misc','insurance',
-                       'link1','link2','link3'];
+  let appData = { trips: [], nextTripId: 1 };
+  let currentTripId = null;
+  let lastTotal = 0;
+
+  const EXPENSE_KEYS = ['car','fuel','parking','hotel1','hotel2','hotel3',
+                        'charyn','kolsai','medeu','tickets_other',
+                        'food1','food2','food3','souvenirs','misc','insurance',
+                        'link1','link2','link3'];
 
   // ── Persistence ────────────────────────────────────────
-  function saveData() {
-    const data = {
-      expenses: {},
-      participants,
-      payments,
-      nextPId,
-      nextPayId,
-    };
-    EXPENSE_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) data.expenses[id] = el.value;
-    });
-    localStorage.setItem('almaty-budget-v2', JSON.stringify(data));
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(appData));
   }
 
-  function loadData() {
+  function load() {
     try {
-      const raw = localStorage.getItem('almaty-budget-v2');
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (data.expenses) {
-        EXPENSE_IDS.forEach(id => {
-          const el = document.getElementById(id);
-          if (el && data.expenses[id] !== undefined) el.value = data.expenses[id];
-        });
-      }
-      if (data.participants && data.participants.length) participants = data.participants;
-      if (data.payments) payments = data.payments;
-      if (data.nextPId) nextPId = data.nextPId;
-      if (data.nextPayId) nextPayId = data.nextPayId;
-      [1,2,3].forEach(n => updateLink(n));
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) appData = JSON.parse(raw);
     } catch {}
   }
 
+  function currentTrip() {
+    return appData.trips.find(t => t.id === currentTripId);
+  }
+
   // ── Helpers ────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
-
   function fmt(n) { return new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₸'; }
-
   function fmtRub(n) { return new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽'; }
-
   function fmtEur(n) { return new Intl.NumberFormat('ru-RU', {maximumFractionDigits:0}).format(n) + ' €'; }
 
-  // ── Participants ───────────────────────────────────────
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // ── Home ───────────────────────────────────────────────
+  function renderHome() {
+    const el = document.getElementById('trips-grid');
+    if (appData.trips.length === 0) {
+      el.innerHTML = '<div class="no-trips">Нет поездок. Создай первую!</div>';
+      return;
+    }
+    el.innerHTML = appData.trips.map(trip => {
+      const pCount = trip.participants.length;
+      const date   = new Date(trip.createdAt).toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+      const total  = Object.values(trip.expenses || {})
+        .filter(k => !['link1','link2','link3'].includes(k))
+        .reduce((s, val) => s + (parseFloat(val) || 0), 0);
+      return `
+        <div class="trip-card" onclick="openTrip(${trip.id})">
+          <button class="trip-card-delete" onclick="event.stopPropagation(); deleteTrip(${trip.id})">×</button>
+          <div class="trip-card-name">${escHtml(trip.name)}</div>
+          <div class="trip-card-meta">
+            <span>👥 ${pCount} ${pCount === 1 ? 'участник' : pCount < 5 ? 'участника' : 'участников'}</span>
+            <span>📅 ${date}</span>
+            ${total > 0 ? `<span style="color:var(--accent);margin-top:4px;font-weight:600;">${fmt(total)}</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function goHome() {
+    currentTripId = null;
+    renderHome();
+    showView('view-home');
+  }
+
+  function deleteTrip(id) {
+    if (!confirm('Удалить поездку?')) return;
+    appData.trips = appData.trips.filter(t => t.id !== id);
+    save();
+    renderHome();
+  }
+
+  // ── Create modal ───────────────────────────────────────
+  let modalParticipants = [];
+  let modalNextId = 1;
+
+  function openCreateModal() {
+    modalParticipants = [{ id: 1, name: '' }, { id: 2, name: '' }];
+    modalNextId = 3;
+    document.getElementById('new-trip-name').value = '';
+    renderModalParticipants();
+    document.getElementById('modal-create').classList.remove('hidden');
+    document.getElementById('new-trip-name').focus();
+  }
+
+  function closeCreateModal() {
+    document.getElementById('modal-create').classList.add('hidden');
+  }
+
+  function renderModalParticipants() {
+    const el = document.getElementById('modal-participants');
+    el.innerHTML = modalParticipants.map((p, i) => `
+      <div class="modal-participant-row">
+        <input type="text" class="modal-input" value="${escHtml(p.name)}"
+               placeholder="Имя участника ${i + 1}"
+               oninput="modalParticipants[${i}].name = this.value" />
+        ${modalParticipants.length > 1
+          ? `<button class="remove-btn" onclick="modalRemoveParticipant(${p.id})">×</button>`
+          : ''}
+      </div>`).join('');
+  }
+
+  function modalAddParticipant() {
+    modalParticipants.push({ id: modalNextId++, name: '' });
+    renderModalParticipants();
+  }
+
+  function modalRemoveParticipant(id) {
+    if (modalParticipants.length <= 1) return;
+    modalParticipants = modalParticipants.filter(p => p.id !== id);
+    renderModalParticipants();
+  }
+
+  function createTrip() {
+    const name = document.getElementById('new-trip-name').value.trim() || 'Поездка';
+    const participants = modalParticipants.map((p, i) => ({
+      id: p.id,
+      name: p.name.trim() || `Участник ${i + 1}`
+    }));
+    const trip = {
+      id: appData.nextTripId++,
+      name,
+      createdAt: new Date().toISOString(),
+      participants,
+      nextPId:   modalNextId,
+      nextPayId: 1,
+      payments:  [],
+      expenses:  {}
+    };
+    appData.trips.unshift(trip);
+    save();
+    closeCreateModal();
+    openTrip(trip.id);
+  }
+
+  // ── Open trip ──────────────────────────────────────────
+  function openTrip(id) {
+    currentTripId = id;
+    const trip = currentTrip();
+    if (!trip) return;
+
+    document.getElementById('trip-title').textContent = trip.name;
+
+    // Fill expense inputs
+    EXPENSE_KEYS.forEach(key => {
+      const el = document.getElementById(key);
+      if (el) el.value = trip.expenses[key] || '';
+    });
+    [1,2,3].forEach(n => updateLink(n));
+
+    renderParticipants();
+    renderPayments();
+    calc();
+    showView('view-trip');
+    fetchRates();
+  }
+
+  // ── Participants (in trip) ─────────────────────────────
   function renderParticipants() {
+    const trip = currentTrip();
+    if (!trip) return;
     const el = document.getElementById('participants-list');
     el.innerHTML = '';
-    participants.forEach(p => {
+    trip.participants.forEach(p => {
       const row = document.createElement('div');
       row.className = 'participant-row';
       row.innerHTML = `
         <input type="text" class="participant-name" value="${escHtml(p.name)}"
                oninput="updateParticipantName(${p.id}, this.value)" placeholder="Имя" />
-        ${participants.length > 1
+        ${trip.participants.length > 1
           ? `<button class="remove-btn" onclick="removeParticipant(${p.id})">×</button>`
-          : ''}
-      `;
+          : ''}`;
       el.appendChild(row);
     });
     renderPayments();
   }
 
   function addParticipant() {
-    const id = nextPId++;
-    participants.push({ id, name: `Участник ${id}` });
-    renderParticipants();
-    calc();
-    saveData();
+    const trip = currentTrip();
+    if (!trip) return;
+    trip.participants.push({ id: trip.nextPId++, name: `Участник ${trip.nextPId - 1}` });
+    save(); renderParticipants(); calc();
   }
 
   function removeParticipant(id) {
-    if (participants.length <= 1) return;
-    participants = participants.filter(p => p.id !== id);
-    payments = payments.filter(pay => pay.participantId !== id);
-    renderParticipants();
-    calc();
-    saveData();
+    const trip = currentTrip();
+    if (!trip || trip.participants.length <= 1) return;
+    trip.participants = trip.participants.filter(p => p.id !== id);
+    trip.payments     = trip.payments.filter(pay => pay.participantId !== id);
+    save(); renderParticipants(); calc();
   }
 
   function updateParticipantName(id, name) {
-    const p = participants.find(p => p.id === id);
+    const trip = currentTrip();
+    if (!trip) return;
+    const p = trip.participants.find(p => p.id === id);
     if (p) p.name = name;
     renderPayments();
     calcSettlement(lastTotal);
-    saveData();
+    save();
   }
 
   // ── Payments ───────────────────────────────────────────
   function renderPayments() {
+    const trip = currentTrip();
+    if (!trip) return;
     const el = document.getElementById('payments-list');
-    if (!el) return;
     el.innerHTML = '';
-    if (payments.length === 0) {
+    if (trip.payments.length === 0) {
       el.innerHTML = '<div class="payments-empty">Добавьте платёж — кто и сколько реально заплатил</div>';
       calcSettlement(lastTotal);
       return;
     }
-    payments.forEach(pay => {
-      const options = participants.map(p =>
+    trip.payments.forEach(pay => {
+      const options = trip.participants.map(p =>
         `<option value="${p.id}" ${pay.participantId === p.id ? 'selected' : ''}>${escHtml(p.name)}</option>`
       ).join('');
       const row = document.createElement('div');
@@ -846,139 +883,129 @@
         </div>
         <input type="text" class="pay-note" value="${escHtml(pay.note)}"
                placeholder="За что…" oninput="updatePayment(${pay.id}, 'note', this.value)" />
-        <button class="remove-btn" onclick="removePayment(${pay.id})">×</button>
-      `;
+        <button class="remove-btn" onclick="removePayment(${pay.id})">×</button>`;
       el.appendChild(row);
     });
     calcSettlement(lastTotal);
   }
 
   function addPayment() {
-    const id = nextPayId++;
-    payments.push({ id, participantId: participants[0].id, amount: 0, note: '' });
-    renderPayments();
-    saveData();
+    const trip = currentTrip();
+    if (!trip) return;
+    trip.payments.push({ id: trip.nextPayId++, participantId: trip.participants[0].id, amount: 0, note: '' });
+    save(); renderPayments();
   }
 
   function removePayment(id) {
-    payments = payments.filter(p => p.id !== id);
-    renderPayments();
-    saveData();
+    const trip = currentTrip();
+    if (!trip) return;
+    trip.payments = trip.payments.filter(p => p.id !== id);
+    save(); renderPayments();
   }
 
   function updatePayment(id, field, value) {
-    const pay = payments.find(p => p.id === id);
+    const trip = currentTrip();
+    if (!trip) return;
+    const pay = trip.payments.find(p => p.id === id);
     if (!pay) return;
     if (field === 'amount') pay.amount = parseFloat(value) || 0;
     else if (field === 'participantId') pay.participantId = parseInt(value);
     else pay.note = value;
     calcSettlement(lastTotal);
-    saveData();
+    save();
   }
 
   // ── Settlement ─────────────────────────────────────────
-  let lastTotal = 0;
-
   function calcSettlement(total) {
     lastTotal = total;
-    const n = participants.length;
+    const trip = currentTrip();
+    const el   = document.getElementById('settlement-content');
+    if (!trip) return;
+
+    const n = trip.participants.length;
     const fairShare = n > 0 ? total / n : 0;
 
-    // Sum paid per participant
     const paid = {};
-    participants.forEach(p => { paid[p.id] = 0; });
-    payments.forEach(pay => {
+    trip.participants.forEach(p => { paid[p.id] = 0; });
+    trip.payments.forEach(pay => {
       if (paid[pay.participantId] !== undefined) paid[pay.participantId] += pay.amount;
     });
 
-    // Balances
-    const balances = participants.map(p => ({
+    const balances = trip.participants.map(p => ({
       ...p,
       paid: paid[p.id],
       owes: fairShare,
       balance: paid[p.id] - fairShare
     }));
 
-    // Render table
-    const el = document.getElementById('settlement-content');
-    if (total === 0 && payments.length === 0) {
+    if (total === 0 && trip.payments.length === 0) {
       el.innerHTML = '<div class="settlement-empty">Заполни расходы и платежи — здесь появится кто кому должен</div>';
       return;
     }
 
     let html = `<table class="settlement-table">
-      <thead><tr>
-        <th>Участник</th>
-        <th>Заплатил</th>
-        <th>Доля</th>
-        <th>Баланс</th>
-      </tr></thead><tbody>`;
-
+      <thead><tr><th>Участник</th><th>Заплатил</th><th>Доля</th><th>Баланс</th></tr></thead><tbody>`;
     balances.forEach(b => {
-      const balClass = b.balance > 0 ? 'bal-pos' : b.balance < 0 ? 'bal-neg' : 'bal-zero';
-      const balSign  = b.balance > 0 ? '+' : '';
-      html += `<tr>
-        <td>${escHtml(b.name)}</td>
-        <td>${fmt(b.paid)}</td>
-        <td>${fmt(b.owes)}</td>
-        <td class="${balClass}">${balSign}${fmt(b.balance)}</td>
-      </tr>`;
+      const cls  = b.balance > 0 ? 'bal-pos' : b.balance < 0 ? 'bal-neg' : 'bal-zero';
+      const sign = b.balance > 0 ? '+' : '';
+      html += `<tr><td>${escHtml(b.name)}</td><td>${fmt(b.paid)}</td><td>${fmt(b.owes)}</td>
+               <td class="${cls}">${sign}${fmt(b.balance)}</td></tr>`;
     });
-
     html += '</tbody></table>';
 
-    // Minimum transactions (greedy)
     const transfers = minTransfers(balances);
     if (transfers.length > 0) {
       html += '<div class="transfers">';
       transfers.forEach(t => {
         html += `<div class="transfer-item">
-          <span>${escHtml(t.from)}</span>
-          <span class="transfer-arrow">→</span>
-          <span>${escHtml(t.to)}</span>
-          <span class="transfer-amount">${fmt(t.amount)}</span>
+          <span>${escHtml(t.from)}</span><span class="transfer-arrow">→</span>
+          <span>${escHtml(t.to)}</span><span class="transfer-amount">${fmt(t.amount)}</span>
         </div>`;
       });
       html += '</div>';
-    } else if (payments.length > 0) {
+    } else if (trip.payments.length > 0) {
       html += '<div class="settlement-empty" style="margin-top:12px;">Все в расчёте ✓</div>';
     }
-
     el.innerHTML = html;
   }
 
   function minTransfers(balances) {
     const eps = 1;
-    const creditors = balances.filter(b => b.balance > eps).map(b => ({ name: b.name, amount: b.balance }));
-    const debtors   = balances.filter(b => b.balance < -eps).map(b => ({ name: b.name, amount: -b.balance }));
-    const result = [];
-
-    while (creditors.length && debtors.length) {
-      const c = creditors[creditors.length - 1];
-      const d = debtors[debtors.length - 1];
-      const transfer = Math.min(c.amount, d.amount);
-      result.push({ from: d.name, to: c.name, amount: transfer });
-      c.amount -= transfer;
-      d.amount -= transfer;
-      if (c.amount < eps) creditors.pop();
-      if (d.amount < eps) debtors.pop();
+    const cred = balances.filter(b => b.balance >  eps).map(b => ({ name: b.name, amount:  b.balance }));
+    const debt = balances.filter(b => b.balance < -eps).map(b => ({ name: b.name, amount: -b.balance }));
+    const res  = [];
+    while (cred.length && debt.length) {
+      const c = cred[cred.length - 1], d = debt[debt.length - 1];
+      const t = Math.min(c.amount, d.amount);
+      res.push({ from: d.name, to: c.name, amount: t });
+      c.amount -= t; d.amount -= t;
+      if (c.amount < eps) cred.pop();
+      if (d.amount < eps) debt.pop();
     }
-
-    return result;
+    return res;
   }
 
-  // ── Main calc ──────────────────────────────────────────
+  // ── Calc ───────────────────────────────────────────────
   function calc() {
+    const trip = currentTrip();
+    if (!trip) return;
+
     const transport = v('car') + v('fuel') + v('parking');
     const hotel     = v('hotel1') + v('hotel2') + v('hotel3');
     const parks     = v('charyn') + v('kolsai') + v('medeu') + v('tickets_other');
     const food      = v('food1') + v('food2') + v('food3');
     const misc      = v('souvenirs') + v('misc') + v('insurance');
-
     const total     = transport + hotel + parks + food + misc;
-    const n         = participants.length || 1;
+    const n         = trip.participants.length || 1;
     const perPerson = total / n;
     const perDay    = perPerson / 3;
+
+    // Save expenses to trip
+    EXPENSE_KEYS.forEach(key => {
+      const el = document.getElementById(key);
+      if (el) trip.expenses[key] = el.value;
+    });
+    save();
 
     document.getElementById('total').textContent      = fmt(total);
     document.getElementById('per-person').textContent = fmt(perPerson);
@@ -992,18 +1019,16 @@
     document.getElementById('b-food').textContent      = fmt(food);
     document.getElementById('b-misc').textContent      = fmt(misc);
 
-    const rub = v('rate-rub');
-    const eur = v('rate-eur');
-    document.getElementById('c-total-rub').textContent = fmtRub(total * rub);
-    document.getElementById('c-pp-rub').textContent    = fmtRub(perPerson * rub);
-    document.getElementById('c-pd-rub').textContent    = fmtRub(perDay * rub);
-    document.getElementById('c-total-eur').textContent = fmtEur(total * eur);
-    document.getElementById('c-pp-eur').textContent    = fmtEur(perPerson * eur);
-    document.getElementById('c-pd-eur').textContent    = fmtEur(perDay * eur);
-
+    const rub = v('rate-rub'), eur = v('rate-eur');
     const ppLabel = n === 1 ? 'На человека' : `На чел. (из ${n})`;
-    document.getElementById('c-pp-label-rub').textContent = ppLabel;
-    document.getElementById('c-pp-label-eur').textContent = ppLabel;
+    document.getElementById('c-total-rub').textContent     = fmtRub(total * rub);
+    document.getElementById('c-pp-rub').textContent        = fmtRub(perPerson * rub);
+    document.getElementById('c-pd-rub').textContent        = fmtRub(perDay * rub);
+    document.getElementById('c-total-eur').textContent     = fmtEur(total * eur);
+    document.getElementById('c-pp-eur').textContent        = fmtEur(perPerson * eur);
+    document.getElementById('c-pd-eur').textContent        = fmtEur(perDay * eur);
+    document.getElementById('c-pp-label-rub').textContent  = ppLabel;
+    document.getElementById('c-pp-label-eur').textContent  = ppLabel;
 
     if (total > 0) {
       document.getElementById('seg-transport').style.width = (transport / total * 100) + '%';
@@ -1017,7 +1042,6 @@
     }
 
     calcSettlement(total);
-    saveData();
   }
 
   // ── Links ──────────────────────────────────────────────
@@ -1028,62 +1052,57 @@
     const url = input.value.trim();
     if (url) { btn.href = url; btn.classList.remove('disabled'); }
     else     { btn.href = '#'; btn.classList.add('disabled'); }
+    if (currentTrip()) { currentTrip().expenses['link' + n] = input.value; save(); }
   }
 
-  // ── Reset ──────────────────────────────────────────────
-  function resetAll() {
-    EXPENSE_IDS.forEach(id => {
-      const el = document.getElementById(id);
+  // ── Reset expenses ─────────────────────────────────────
+  function resetExpenses() {
+    if (!confirm('Сбросить все расходы?')) return;
+    const trip = currentTrip();
+    if (!trip) return;
+    EXPENSE_KEYS.forEach(key => {
+      const el = document.getElementById(key);
       if (el) el.value = '';
     });
+    trip.expenses = {};
+    trip.payments = [];
     [1,2,3].forEach(n => updateLink(n));
-    participants = [{ id: 1, name: 'Участник 1' }, { id: 2, name: 'Участник 2' }];
-    payments = [];
-    nextPId  = 3;
-    nextPayId = 1;
-    localStorage.removeItem('almaty-budget-v2');
-    renderParticipants();
+    save();
+    renderPayments();
     calc();
   }
 
-  // ── Exchange rates ─────────────────────────────────────
+  // ── Rates ──────────────────────────────────────────────
   async function fetchRates() {
     const btn    = document.getElementById('refresh-btn');
     const status = document.getElementById('rate-status');
-    btn.disabled = true;
-    btn.textContent = '↻ Загрузка…';
-    status.className = 'rate-status';
-    status.textContent = '';
+    btn.disabled = true; btn.textContent = '↻ Загрузка…';
+    status.className = 'rate-status'; status.textContent = '';
     try {
       const res  = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/kzt.json');
       if (!res.ok) throw new Error();
       const data = await res.json();
       document.getElementById('rate-rub').value = data.kzt.rub.toFixed(4);
       document.getElementById('rate-eur').value = data.kzt.eur.toFixed(6);
-      const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      const now = new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
       status.textContent = `Курс обновлён в ${now}`;
       calc();
     } catch {
       status.className = 'rate-status error';
-      status.textContent = 'Не удалось загрузить курс — проверьте интернет';
+      status.textContent = 'Не удалось загрузить курс';
     } finally {
-      btn.disabled = false;
-      btn.textContent = '↻ Обновить курс';
+      btn.disabled = false; btn.textContent = '↻ Обновить курс';
     }
   }
 
-  // ── XSS safety ────────────────────────────────────────
-  function escHtml(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  // ── Close modal on backdrop click ─────────────────────
+  document.getElementById('modal-create').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeCreateModal();
+  });
 
   // ── Init ───────────────────────────────────────────────
-  loadData();
-  renderParticipants();
-  calc();
-  fetchRates();
+  load();
+  renderHome();
 </script>
 </body>
 </html>
