@@ -405,6 +405,32 @@
     .pay-note::placeholder { color: #3d4460; }
     .payments-empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0; }
 
+    /* Extra expenses */
+    .extra-row {
+      display: grid;
+      grid-template-columns: 1fr 140px auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 500px) {
+      .extra-row { grid-template-columns: 1fr auto; grid-template-rows: auto auto; }
+      .extra-row .extra-amount { grid-column: 1; }
+    }
+    .extra-name {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 0.875rem; padding: 9px 12px;
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .extra-name:focus { border-color: var(--accent); }
+    .extra-name::placeholder { color: #3d4460; }
+    .extra-amount { position: relative; }
+    .extra-amount input { padding-right: 30px; font-size: 0.9rem; padding-top: 9px; padding-bottom: 9px; }
+    .extra-amount span {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 0.8rem; pointer-events: none;
+    }
+
     /* Settlement */
     .settlement-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 0.875rem; }
     .settlement-table th {
@@ -487,19 +513,11 @@
       </div>
     </div>
 
-    <!-- Парки -->
+    <!-- Доп. расходы -->
     <div class="card full">
-      <div class="card-title"><span>🏞</span> Парки и достопримечательности</div>
-      <div class="grid" style="gap:10px;">
-        <div class="field"><label>Чарынский каньон — вход (на всех)</label>
-          <div class="suffix"><input type="number" id="charyn" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-        <div class="field"><label>Кольсай — вход (на всех)</label>
-          <div class="suffix"><input type="number" id="kolsai" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-        <div class="field"><label>Фуникулёр Медеу (на всех)</label>
-          <div class="suffix"><input type="number" id="medeu" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-        <div class="field"><label>Прочие входные билеты</label>
-          <div class="suffix"><input type="number" id="tickets_other" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-      </div>
+      <div class="card-title"><span>🧾</span> Дополнительные расходы</div>
+      <div id="extra-list"></div>
+      <button class="add-btn" onclick="addExtra()" style="margin-top:8px;">+ Добавить расход</button>
     </div>
 
     <!-- Питание -->
@@ -572,7 +590,7 @@
       <div class="breakdown-list">
         <div class="bline"><span class="bline-name">🚗 Транспорт</span><span class="bline-val" id="b-transport">0 ₸</span></div>
         <div class="bline"><span class="bline-name">🏨 Проживание</span><span class="bline-val" id="b-hotel">0 ₸</span></div>
-        <div class="bline"><span class="bline-name">🏞 Парки</span><span class="bline-val" id="b-parks">0 ₸</span></div>
+        <div class="bline"><span class="bline-name">🧾 Доп. расходы</span><span class="bline-val" id="b-parks">0 ₸</span></div>
         <div class="bline"><span class="bline-name">🍽 Питание</span><span class="bline-val" id="b-food">0 ₸</span></div>
         <div class="bline"><span class="bline-name">💼 Прочее</span><span class="bline-val" id="b-misc">0 ₸</span></div>
       </div>
@@ -588,7 +606,7 @@
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:#6c8ef5"></div>Транспорт</div>
           <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Проживание</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Парки</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Доп. расходы</div>
           <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Питание</div>
           <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Прочее</div>
         </div>
@@ -650,7 +668,6 @@
   let lastTotal = 0;
 
   const EXPENSE_KEYS = ['car','fuel','parking','hotel1','hotel2','hotel3',
-                        'charyn','kolsai','medeu','tickets_other',
                         'food1','food2','food3','souvenirs','misc','insurance',
                         'link1','link2','link3'];
 
@@ -807,9 +824,64 @@
 
     renderParticipants();
     renderPayments();
+    renderExtras();
     calc();
     showView('view-trip');
     fetchRates();
+  }
+
+  // ── Extra expenses ─────────────────────────────────────
+  function renderExtras() {
+    const trip = currentTrip();
+    if (!trip) return;
+    if (!trip.extras) trip.extras = [];
+    const el = document.getElementById('extra-list');
+    el.innerHTML = '';
+    if (trip.extras.length === 0) {
+      el.innerHTML = '<div class="payments-empty">Добавьте расход — билеты, экскурсии, любые траты</div>';
+      return;
+    }
+    trip.extras.forEach(ex => {
+      const row = document.createElement('div');
+      row.className = 'extra-row';
+      row.innerHTML = `
+        <input type="text" class="extra-name" value="${escHtml(ex.name)}"
+               placeholder="Название (Чарынский каньон…)"
+               oninput="updateExtra(${ex.id}, 'name', this.value)" />
+        <div class="extra-amount">
+          <input type="number" value="${ex.amount || ''}" placeholder="0" min="0"
+                 oninput="updateExtra(${ex.id}, 'amount', this.value)" />
+          <span>₸</span>
+        </div>
+        <button class="remove-btn" onclick="removeExtra(${ex.id})">×</button>`;
+      el.appendChild(row);
+    });
+  }
+
+  function addExtra() {
+    const trip = currentTrip();
+    if (!trip) return;
+    if (!trip.extras) trip.extras = [];
+    if (!trip.nextExtraId) trip.nextExtraId = 1;
+    trip.extras.push({ id: trip.nextExtraId++, name: '', amount: 0 });
+    save(); renderExtras();
+  }
+
+  function removeExtra(id) {
+    const trip = currentTrip();
+    if (!trip) return;
+    trip.extras = trip.extras.filter(e => e.id !== id);
+    save(); renderExtras(); calc();
+  }
+
+  function updateExtra(id, field, value) {
+    const trip = currentTrip();
+    if (!trip) return;
+    const ex = trip.extras.find(e => e.id === id);
+    if (!ex) return;
+    if (field === 'amount') ex.amount = parseFloat(value) || 0;
+    else ex.name = value;
+    save(); calc();
   }
 
   // ── Participants (in trip) ─────────────────────────────
@@ -992,10 +1064,10 @@
 
     const transport = v('car') + v('fuel') + v('parking');
     const hotel     = v('hotel1') + v('hotel2') + v('hotel3');
-    const parks     = v('charyn') + v('kolsai') + v('medeu') + v('tickets_other');
+    const extras    = (trip.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
     const food      = v('food1') + v('food2') + v('food3');
     const misc      = v('souvenirs') + v('misc') + v('insurance');
-    const total     = transport + hotel + parks + food + misc;
+    const total     = transport + hotel + extras + food + misc;
     const n         = trip.participants.length || 1;
     const perPerson = total / n;
     const perDay    = perPerson / 3;
@@ -1015,7 +1087,7 @@
 
     document.getElementById('b-transport').textContent = fmt(transport);
     document.getElementById('b-hotel').textContent     = fmt(hotel);
-    document.getElementById('b-parks').textContent     = fmt(parks);
+    document.getElementById('b-parks').textContent     = fmt(extras);
     document.getElementById('b-food').textContent      = fmt(food);
     document.getElementById('b-misc').textContent      = fmt(misc);
 
@@ -1033,7 +1105,7 @@
     if (total > 0) {
       document.getElementById('seg-transport').style.width = (transport / total * 100) + '%';
       document.getElementById('seg-hotel').style.width     = (hotel / total * 100) + '%';
-      document.getElementById('seg-parks').style.width     = (parks / total * 100) + '%';
+      document.getElementById('seg-parks').style.width     = (extras / total * 100) + '%';
       document.getElementById('seg-food').style.width      = (food / total * 100) + '%';
       document.getElementById('seg-misc').style.width      = (misc / total * 100) + '%';
     } else {
@@ -1066,6 +1138,7 @@
     });
     trip.expenses = {};
     trip.payments = [];
+    trip.extras   = [];
     [1,2,3].forEach(n => updateLink(n));
     save();
     renderPayments();
