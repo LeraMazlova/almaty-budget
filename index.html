@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Бюджет поездки</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -388,15 +389,88 @@
       padding: 8px 16px; transition: border-color 0.2s, color 0.2s;
     }
     .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Auth ── */
+    .auth-wrap {
+      min-height: 100vh; display: flex; align-items: center;
+      justify-content: center; padding: 24px;
+    }
+    .auth-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 36px; width: 100%; max-width: 380px;
+    }
+    .auth-box h1 {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .auth-box p { color: var(--muted); font-size: 0.875rem; margin-bottom: 24px; }
+    .auth-error {
+      background: rgba(248,113,113,0.1); border: 1px solid var(--red);
+      border-radius: 8px; color: var(--red); font-size: 0.82rem;
+      padding: 10px 14px; margin-bottom: 16px;
+    }
+    .auth-error.hidden { display: none; }
+    .auth-toggle {
+      text-align: center; margin-top: 16px; font-size: 0.82rem; color: var(--muted);
+    }
+    .auth-toggle button {
+      background: none; border: none; color: var(--accent);
+      cursor: pointer; font-size: 0.82rem; padding: 0 4px;
+    }
+    .auth-toggle button:hover { text-decoration: underline; }
+    .sync-badge {
+      font-size: 0.72rem; color: var(--green); margin-left: auto;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .sync-badge.syncing { color: var(--muted); }
+    .sync-badge.error   { color: var(--red); }
+    .logout-btn {
+      background: transparent; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 7px 14px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
   </style>
 </head>
 <body>
 
+<!-- ── AUTH ── -->
+<div id="view-auth" class="view active">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <h1>✈️ Бюджет поездки</h1>
+      <p>Войди, чтобы данные синхронизировались на всех устройствах</p>
+      <div id="auth-error" class="auth-error hidden"></div>
+      <div class="modal-field">
+        <div class="modal-label">Email</div>
+        <input type="email" class="modal-input" id="auth-email" placeholder="you@example.com"
+               onkeydown="if(event.key==='Enter') handleAuth()" />
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Пароль</div>
+        <input type="password" class="modal-input" id="auth-password" placeholder="минимум 6 символов"
+               onkeydown="if(event.key==='Enter') handleAuth()" />
+      </div>
+      <button class="btn-primary" onclick="handleAuth()" id="auth-btn"
+              style="width:100%;padding:12px;margin-top:4px;">Войти</button>
+      <div class="auth-toggle">
+        <span id="auth-toggle-text">Нет аккаунта?</span>
+        <button onclick="toggleAuthMode()" id="auth-toggle-btn">Зарегистрироваться</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── HOME ── -->
-<div id="view-home" class="view active">
+<div id="view-home" class="view">
   <div class="home-header">
     <h1>✈️ Мои поездки</h1>
-    <button class="btn-primary" onclick="openCreateModal()">+ Новая поездка</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="sync-badge" id="sync-badge"></span>
+      <button class="btn-primary" onclick="openCreateModal()">+ Новая поездка</button>
+      <button class="logout-btn" onclick="doSignOut()">Выйти</button>
+    </div>
   </div>
   <div id="trips-grid" class="trips-grid"></div>
 </div>
@@ -1152,9 +1226,129 @@
     if (e.target === e.currentTarget) closeCreateModal();
   });
 
+  // ── Supabase ───────────────────────────────────────────
+  const SUPABASE_URL = 'https://tbgmwsvjbiidspxauoxj.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_rMgTAWohbzFrf78VZgn4Fw_3UZp1Pjy';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser = null;
+  let saveTimer   = null;
+
+  // Supabase: загрузить данные
+  async function loadFromSupabase() {
+    if (!currentUser) return;
+    const { data } = await sb.from('user_data').select('data').eq('user_id', currentUser.id).single();
+    if (data?.data) {
+      appData = data.data;
+      localStorage.setItem(STORE_KEY, JSON.stringify(appData));
+    }
+  }
+
+  // Supabase: сохранить данные (с задержкой 1.5s)
+  function scheduleSync() {
+    clearTimeout(saveTimer);
+    setSyncBadge('syncing');
+    saveTimer = setTimeout(async () => {
+      if (!currentUser) return;
+      const { error } = await sb.from('user_data').upsert(
+        { user_id: currentUser.id, data: appData, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      );
+      setSyncBadge(error ? 'error' : 'ok');
+    }, 1500);
+  }
+
+  function setSyncBadge(state) {
+    const el = document.getElementById('sync-badge');
+    if (!el) return;
+    if (state === 'ok')      { el.className = 'sync-badge';         el.textContent = '✓ Синхронизировано'; }
+    else if (state === 'syncing') { el.className = 'sync-badge syncing'; el.textContent = '⟳ Сохранение…'; }
+    else                     { el.className = 'sync-badge error';   el.textContent = '✕ Ошибка синхронизации'; }
+  }
+
+  // Перезаписать save() — теперь сохраняем и в Supabase
+  const _origSave = save;
+  save = function() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(appData));
+    scheduleSync();
+  };
+
+  // ── Auth ───────────────────────────────────────────────
+  let authMode = 'login'; // 'login' | 'register'
+
+  function toggleAuthMode() {
+    authMode = authMode === 'login' ? 'register' : 'login';
+    document.getElementById('auth-btn').textContent          = authMode === 'login' ? 'Войти' : 'Зарегистрироваться';
+    document.getElementById('auth-toggle-text').textContent  = authMode === 'login' ? 'Нет аккаунта?' : 'Уже есть аккаунт?';
+    document.getElementById('auth-toggle-btn').textContent   = authMode === 'login' ? 'Зарегистрироваться' : 'Войти';
+    document.getElementById('auth-error').classList.add('hidden');
+  }
+
+  async function handleAuth() {
+    const email    = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const btn      = document.getElementById('auth-btn');
+    const errEl    = document.getElementById('auth-error');
+
+    if (!email || !password) { showAuthError('Введи email и пароль'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Загрузка…';
+    errEl.classList.add('hidden');
+
+    const fn = authMode === 'login'
+      ? sb.auth.signInWithPassword({ email, password })
+      : sb.auth.signUp({ email, password });
+
+    const { error } = await fn;
+    btn.disabled = false;
+    btn.textContent = authMode === 'login' ? 'Войти' : 'Зарегистрироваться';
+
+    if (error) {
+      const msgs = {
+        'Invalid login credentials': 'Неверный email или пароль',
+        'User already registered':   'Такой email уже зарегистрирован',
+        'Password should be at least 6 characters': 'Пароль минимум 6 символов',
+      };
+      showAuthError(msgs[error.message] || error.message);
+    }
+  }
+
+  function showAuthError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  async function doSignOut() {
+    await sb.auth.signOut();
+    appData = { trips: [], nextTripId: 1 };
+    currentUser = null;
+    showView('view-auth');
+  }
+
   // ── Init ───────────────────────────────────────────────
-  load();
-  renderHome();
+  async function init() {
+    // Слушаем изменения сессии
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        currentUser = session.user;
+        load(); // сначала из localStorage для скорости
+        renderHome();
+        showView('view-home');
+        await loadFromSupabase(); // потом синхронизируем с сервером
+        renderHome();
+      } else {
+        showView('view-auth');
+      }
+    });
+
+    // Проверяем текущую сессию
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) showView('view-auth');
+  }
+
+  init();
 </script>
 </body>
 </html>
