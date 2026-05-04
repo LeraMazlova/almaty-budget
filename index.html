@@ -695,9 +695,34 @@
 </div>
 
 <script>
+  const SAVE_IDS = ['car','fuel','parking','hotel1','hotel2','hotel3',
+                    'charyn','kolsai','medeu','tickets_other',
+                    'food1','food2','food3','souvenirs','misc','insurance',
+                    'link1','link2','link3'];
+
+  function saveData() {
+    const data = { people };
+    SAVE_IDS.forEach(id => { data[id] = document.getElementById(id).value; });
+    localStorage.setItem('almaty-budget', JSON.stringify(data));
+  }
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem('almaty-budget');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.people) setPeople(data.people, false);
+      SAVE_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (data[id] !== undefined) el.value = data[id];
+      });
+      [1,2,3].forEach(n => updateLink(n));
+    } catch {}
+  }
+
   let people = 2;
 
-  function setPeople(n) {
+  function setPeople(n, save = true) {
     people = n;
     [1,2,3,4].forEach(i => {
       document.getElementById('btn' + i).classList.toggle('active', i === n);
@@ -705,6 +730,7 @@
     document.getElementById('per-person-label').textContent =
       n === 1 ? 'На человека' : `На человека (из ${n})`;
     calc();
+    if (save) saveData();
   }
 
   function v(id) {
@@ -755,6 +781,8 @@
     document.getElementById('c-pp-label-rub').textContent = ppLabel;
     document.getElementById('c-pp-label-eur').textContent = ppLabel;
 
+    saveData();
+
     // Bar
     if (total > 0) {
       document.getElementById('seg-transport').style.width = (transport / total * 100) + '%';
@@ -783,14 +811,9 @@
   }
 
   function resetAll() {
-    const ids = ['car','fuel','parking','hotel1','hotel2','hotel3',
-                 'charyn','kolsai','medeu','tickets_other',
-                 'food1','food2','food3','souvenirs','misc','insurance'];
-    ids.forEach(id => { document.getElementById(id).value = ''; });
-    [1,2,3].forEach(n => {
-      document.getElementById('link' + n).value = '';
-      updateLink(n);
-    });
+    SAVE_IDS.forEach(id => { document.getElementById(id).value = ''; });
+    [1,2,3].forEach(n => updateLink(n));
+    localStorage.removeItem('almaty-budget');
     calc();
   }
 
@@ -821,6 +844,7 @@
   }
 
   // Init
+  loadData();
   calc();
   fetchRates();
 </script>
