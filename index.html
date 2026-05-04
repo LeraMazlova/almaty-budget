@@ -420,19 +420,6 @@
       </div>
     </div>
 
-    <!-- Прочее -->
-    <div class="card">
-      <div class="card-title"><span>💼</span> Прочее</div>
-      <div class="input-row">
-        <div class="field"><label>Сувениры / шопинг</label>
-          <div class="suffix"><input type="number" id="souvenirs" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-        <div class="field"><label>Непредвиденные расходы</label>
-          <div class="suffix"><input type="number" id="misc" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-        <div class="field"><label>Страховка</label>
-          <div class="suffix"><input type="number" id="insurance" placeholder="0" min="0" oninput="calc()" /><span>₸</span></div></div>
-      </div>
-    </div>
-
     <!-- Доп. расходы -->
     <div class="card full">
       <div class="card-title"><span>🧾</span> Дополнительные расходы</div>
@@ -486,7 +473,6 @@
         <div class="bline"><span class="bline-name">🏨 Проживание</span><span class="bline-val" id="b-hotel">0 ₸</span></div>
         <div class="bline"><span class="bline-name">🍽 Питание</span><span class="bline-val" id="b-food">0 ₸</span></div>
         <div class="bline"><span class="bline-name">🧾 Доп. расходы</span><span class="bline-val" id="b-extras">0 ₸</span></div>
-        <div class="bline"><span class="bline-name">💼 Прочее</span><span class="bline-val" id="b-misc">0 ₸</span></div>
       </div>
 
       <div class="bar-wrap">
@@ -495,14 +481,12 @@
           <div class="bar-seg" id="seg-hotel"     style="background:#a78bfa;width:0%"></div>
           <div class="bar-seg" id="seg-food"      style="background:#fbbf24;width:0%"></div>
           <div class="bar-seg" id="seg-extras"    style="background:#34d399;width:0%"></div>
-          <div class="bar-seg" id="seg-misc"      style="background:#f87171;width:0%"></div>
         </div>
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:#6c8ef5"></div>Транспорт</div>
           <div class="legend-item"><div class="legend-dot" style="background:#a78bfa"></div>Проживание</div>
           <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Питание</div>
           <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div>Доп. расходы</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div>Прочее</div>
         </div>
       </div>
 
@@ -570,8 +554,7 @@
   let currentTripId = null;
   let lastTotal = 0;
 
-  const EXPENSE_KEYS = ['car','fuel','parking','food1','food2','food3',
-                        'souvenirs','misc','insurance'];
+  const EXPENSE_KEYS = ['car','fuel','parking','food1','food2','food3'];
 
   // ── Persistence ────────────────────────────────────────
   function save() { localStorage.setItem(STORE_KEY, JSON.stringify(appData)); }
@@ -1069,8 +1052,7 @@
     const hotel     = (trip.accommodations||[]).reduce((s,a) => s + (a.amount||0), 0);
     const food      = v('food1') + v('food2') + v('food3');
     const extras    = (trip.extras||[]).reduce((s,e) => s + (e.amount||0), 0);
-    const misc      = v('souvenirs') + v('misc') + v('insurance');
-    const total     = transport + hotel + food + extras + misc;
+    const total     = transport + hotel + food + extras;
 
     const nights    = trip.nights || 3;
     const n         = trip.participants.length || 1;
@@ -1093,7 +1075,6 @@
     document.getElementById('b-hotel').textContent     = fmt(hotel);
     document.getElementById('b-food').textContent      = fmt(food);
     document.getElementById('b-extras').textContent    = fmt(extras);
-    document.getElementById('b-misc').textContent      = fmt(misc);
 
     const rub = v('rate-rub'), eur = v('rate-eur');
     const ppLabel = n === 1 ? 'На человека' : `На чел. (из ${n})`;
@@ -1111,9 +1092,8 @@
       document.getElementById('seg-hotel').style.width     = (hotel/total*100)+'%';
       document.getElementById('seg-food').style.width      = (food/total*100)+'%';
       document.getElementById('seg-extras').style.width    = (extras/total*100)+'%';
-      document.getElementById('seg-misc').style.width      = (misc/total*100)+'%';
     } else {
-      ['transport','hotel','food','extras','misc'].forEach(k =>
+      ['transport','hotel','food','extras'].forEach(k =>
         document.getElementById('seg-'+k).style.width = '0%');
     }
 
